@@ -1,0 +1,18 @@
+{
+  "name": "openapi-include",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": {
+    "swagger-merger": "./bin/openapi-include.js"
+  },
+  "repository": "https://github.com/kota65535/openapi-include",
+  "author": "Tomohiko Ozawa <tomohiko.ozawa@sony.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^5.1.0",
+    "deepmerge": "^4.2.2",
+    "glob": "^7.1.6",
+    "js-yaml": "^3.14.0",
+    "queue": "^6.0.1"
+  }
+}
