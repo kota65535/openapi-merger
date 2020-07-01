@@ -9,7 +9,7 @@ const PATHS_DIR = 'paths'
 const COMPONENTS_DIR = 'components'
 
 /**
- * localize remote refs.
+ * Localize remote refs.
  * @param doc {object}
  * @param baseDir {string}
  * @returns {object}
@@ -31,7 +31,7 @@ function localizeRefs(doc, baseDir) {
 }
 
 /**
- * copy components under the root document object.
+ * Copy components under the root document object.
  * @param doc {object}
  * @returns {object}
  */
@@ -61,28 +61,26 @@ function localizeComponents(doc) {
 
 
 /**
- * replace all remote refs for components into local refs.
+ * Replace all remote refs for components into local refs.
+ * - Under paths directory only for now
+ * - Files that begins with '_' (underscore) are ignored
  */
 function localizeComponentRefs() {
-  // TODO: currently, paths only
-  const pattern = [ `${PATHS_DIR}/**/*.@(yml|yaml)` ]
-
-  for (const ptn of pattern) {
-    const filePaths = glob.sync(ptn)
-    for (const f of filePaths) {
-      // exclude files that begin with '_'
-      if (path.basename(f).startsWith('_')) {
-        continue
-      }
-      let obj = yaml.readYAML(f)
-      obj = replaceRefs(obj, path.dirname(f))
-      yaml.writeYAML(obj, f)
+  // do we need any other directory?
+  const filePaths = glob.sync(`${PATHS_DIR}/**/*.@(yml|yaml)`)
+  for (const f of filePaths) {
+    // exclude files that begin with '_'
+    if (path.basename(f).startsWith('_')) {
+      continue
     }
+    let obj = yaml.readYAML(f)
+    obj = replaceRefs(obj, path.dirname(f))
+    yaml.writeYAML(obj, f)
   }
 }
 
 /**
- * replace remote refs to local refs to be created.
+ * Replace remote refs to local refs to be created.
  * @param doc {object}
  * @param dir {string}
  * @returns {object}

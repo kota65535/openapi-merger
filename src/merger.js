@@ -36,7 +36,7 @@ async function merger(params) {
 
 
 /**
- * create temporary working directory.
+ * Create temporary working directory.
  * @param inputFile {string}
  * @returns {Promise<*>}
  */
