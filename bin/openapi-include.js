@@ -1,7 +1,7 @@
 'use strict'
 
 const program = require('commander')
-const resolver = require('../lib/resolver')
+const merger = require('../lib/merger')
 
 
 program
@@ -23,7 +23,7 @@ program
         }
         console.debug('options: ', options)
 
-        resolver(options).catch(e => {
+        merger(options).catch(e => {
             if (options.debug) {
                 console.error(e)
             } else {
