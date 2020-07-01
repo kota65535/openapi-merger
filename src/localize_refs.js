@@ -19,13 +19,14 @@ function localizeRefs(doc, baseDir) {
   const cwd = process.cwd()
   process.chdir(baseDir)
 
-  doc = replaceRefs(doc, '')
-  doc = localizeComponents(doc)
-  localizeComponentRefs()
-
-  // revert cwd
-  process.chdir(cwd)
-
+  try {
+    doc = replaceRefs(doc, '')
+    doc = localizeComponents(doc)
+    localizeComponentRefs()
+  } finally {
+    // revert cwd
+    process.chdir(cwd)
+  }
   return doc
 }
 

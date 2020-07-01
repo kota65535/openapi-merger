@@ -6,7 +6,7 @@
     "openapi-merger": "./bin/openapi-merger.js"
   },
   "scripts": {
-    "test": "mocha ./test/**.js"
+    "test": "cd test && mocha *.js"
   },
   "repository": "https://github.com/kota65535/openapi-merger",
   "author": "kota65535 <kota65535@gmail.com>",

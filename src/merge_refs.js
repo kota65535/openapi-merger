@@ -15,12 +15,13 @@ function mergeRefs(doc, baseDir) {
   const cwd = process.cwd()
   process.chdir(baseDir)
 
-  doc = _.cloneDeep(doc)
-  doc = doMergeRefs(doc, '', '')
-
-  // revert cwd
-  process.chdir(cwd)
-
+  try {
+    doc = _.cloneDeep(doc)
+    doc = doMergeRefs(doc, '')
+  } finally {
+    // revert cwd
+    process.chdir(cwd)
+  }
   return doc
 }
 
@@ -28,11 +29,10 @@ function mergeRefs(doc, baseDir) {
 /**
  * merge by replacing $refs with its file content.
  * @param doc {object}
- * @param baseDir {string}
  * @param relativeDir {string}
  * @returns {object}
  */
-function doMergeRefs(doc, baseDir, relativeDir) {
+function doMergeRefs(doc, relativeDir) {
   // base case
   if (!_.isObject(doc)) {
     return doc
@@ -40,7 +40,7 @@ function doMergeRefs(doc, baseDir, relativeDir) {
   let ret = _.isArray(doc) ? [] : {}
   for (const [key, val] of Object.entries(doc)) {
     if (key !== '$ref') {
-      ret[key] = doMergeRefs(val, baseDir, relativeDir)
+      ret[key] = doMergeRefs(val, relativeDir)
       continue
     }
 
@@ -51,9 +51,9 @@ function doMergeRefs(doc, baseDir, relativeDir) {
     }
 
     const targetFilePath = path.join(relativeDir, val)
-    const targetObj = yaml.readYAML(path.join(baseDir, targetFilePath))
+    const targetObj = yaml.readYAML(targetFilePath)
     // recursively $include YAML
-    const resolvedObj = doMergeRefs(targetObj, baseDir, path.dirname(targetFilePath))
+    const resolvedObj = doMergeRefs(targetObj, path.dirname(targetFilePath))
     ret = _.merge(ret, resolvedObj)
   }
 
