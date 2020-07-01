@@ -6,7 +6,7 @@ const yaml = require('./yaml')
 
 
 /**
- * merge remote $refs.
+ * Merge remote $refs.
  * @param doc {object}
  * @param baseDir {string}
  */
@@ -27,7 +27,7 @@ function mergeRefs(doc, baseDir) {
 
 
 /**
- * merge by replacing $refs with its file content.
+ * Merge by replacing $refs with its file content.
  * @param doc {object}
  * @param relativeDir {string}
  * @returns {object}

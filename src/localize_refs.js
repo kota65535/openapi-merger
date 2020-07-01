@@ -94,6 +94,12 @@ function replaceRefs(doc, dir) {
   for (const [key, val] of Object.entries(doc)) {
     if (key === '$ref') {
       ret[key] = convertPathToHash(path.join(dir, val))
+    } else if (key === 'discriminator') {
+      if (_.isObject(ret[key])) {
+        for (const [mkey, mval] of Object.entries(ret[key].mapping)) {
+          ret[key].mapping[mkey] = convertPathToHash(path.join(dir, mval))
+        }
+      }
     } else {
       ret[key] = replaceRefs(val, dir)
     }
