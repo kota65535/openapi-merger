@@ -1,9 +1,23 @@
 'use strict'
 
 const fs = require('fs-extra')
+const path = require('path')
 const glob = require('glob')
 const merger = require('../src/merger')
 const assert = require('chai').assert
+
+const runMerger = async (name) => {
+    const params = {
+        input: path.join('resources', name, 'openapi.yaml'),
+        output: path.join('resources', name, 'out.yaml'),
+        debug: true
+    }
+    await merger(params)
+    assert.equal(
+        '' + fs.readFileSync(params.output),
+        '' + fs.readFileSync(path.join('resources', name, 'expected.yaml'))
+    )
+}
 
 
 describe('merger', () => {
@@ -15,32 +29,16 @@ describe('merger', () => {
         await Promise.all(promises)
     })
 
-    it('petstore', async () => {
-        // when
-        await merger({
-            input: 'resources/petstore/original.yaml',
-            output: 'resources/petstore/out.yaml',
-            debug: true
-        })
-
-        // then
-        assert.equal(
-            '' + fs.readFileSync('resources/petstore/out.yaml'),
-            '' + fs.readFileSync('resources/petstore/expected.yaml'))
+    it('basic test', async () => {
+        await runMerger('petstore')
     });
 
-    it('petstore_2', async () => {
-        // when
-        await merger({
-            input: 'resources/petstore_2/original.yaml',
-            output: 'resources/petstore_2/out.yaml',
-            debug: true
-        })
+    it('with paths dir', async () => {
+        await runMerger('petstore_2')
+    });
 
-        // then
-        assert.equal(
-            '' + fs.readFileSync('resources/petstore_2/out.yaml'),
-            '' + fs.readFileSync('resources/petstore_2/expected.yaml'))
+    it('with discriminator', async () => {
+        await runMerger('petstore_3')
     });
 });
 
