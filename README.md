@@ -2,6 +2,7 @@
 
 merge multiple OpenAPI files into a single file.  
 
+
 ## Features
 - almost the same as [swagger-merger](https://github.com/WindomZ/swagger-merger)
 - convert all remote refs into local refs, rather than simply replacing them by its content. 
@@ -25,5 +26,12 @@ merge multiple OpenAPI files into a single file.
 │       ├── Pet.yaml
 │       └── Pets.yaml
 └── openapi.yaml
+```
+
+## Usage
+
+```sh
+$ npm install -g openapi-merger
+$ openapi-merger -i openapi.yaml -o out.yaml
 ```
 
