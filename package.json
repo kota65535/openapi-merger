@@ -1,12 +1,15 @@
 {
-  "name": "openapi-include",
+  "name": "openapi-merger",
   "version": "1.0.0",
   "main": "index.js",
   "bin": {
-    "swagger-merger": "./bin/openapi-include.js"
+    "openapi-merger": "./bin/openapi-merger.js"
   },
-  "repository": "https://github.com/kota65535/openapi-include",
-  "author": "Tomohiko Ozawa <tomohiko.ozawa@sony.com>",
+  "scripts": {
+    "test": "mocha ./test/**.js"
+  },
+  "repository": "https://github.com/kota65535/openapi-merger",
+  "author": "kota65535 <kota65535@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "commander": "^5.1.0",
@@ -15,5 +18,9 @@
     "js-yaml": "^3.14.0",
     "lodash": "^4.17.15",
     "mktemp": "^1.0.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^8.0.1"
   }
 }

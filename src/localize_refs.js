@@ -5,6 +5,7 @@ const glob = require('glob')
 const _ = require('lodash')
 const yaml = require('./yaml')
 
+const PATHS_DIR = 'paths'
 const COMPONENTS_DIR = 'components'
 
 /**
@@ -18,6 +19,7 @@ function localizeRefs(doc, baseDir) {
   const cwd = process.cwd()
   process.chdir(baseDir)
 
+  doc = replaceRefs(doc, '')
   doc = localizeComponents(doc)
   localizeComponentRefs()
 
@@ -35,7 +37,7 @@ function localizeRefs(doc, baseDir) {
 function localizeComponents(doc) {
   doc = _.cloneDeep(doc)
 
-  const filePaths = glob.sync('**/*.yml', { cwd: COMPONENTS_DIR })
+  const filePaths = glob.sync('**/*.@(yml|yaml)', { cwd: COMPONENTS_DIR })
   let children = {}
   for (const f of filePaths) {
     const componentName = f.split(path.sep)[0]
@@ -56,21 +58,25 @@ function localizeComponents(doc) {
   return Object.assign({}, doc, {[COMPONENTS_DIR]: children})
 }
 
+
 /**
  * replace all remote refs for components into local refs.
  */
 function localizeComponentRefs() {
   // TODO: currently, paths only
-  const PATHS_DIR = 'paths'
-  const filePaths = glob.sync('**/*.yml', { cwd: PATHS_DIR })
-  for (const f of filePaths) {
-    // exclude files that begin with '_'
-    if (path.basename(f).startsWith('_')) {
-      continue
+  const pattern = [ `${PATHS_DIR}/**/*.@(yml|yaml)` ]
+
+  for (const ptn of pattern) {
+    const filePaths = glob.sync(ptn)
+    for (const f of filePaths) {
+      // exclude files that begin with '_'
+      if (path.basename(f).startsWith('_')) {
+        continue
+      }
+      let obj = yaml.readYAML(f)
+      obj = replaceRefs(obj, path.dirname(f))
+      yaml.writeYAML(obj, f)
     }
-    let obj = yaml.readYAML(path.join(PATHS_DIR, f))
-    obj = replaceRefs(obj, PATHS_DIR)
-    yaml.writeYAML(obj, path.join(PATHS_DIR, f))
   }
 }
 

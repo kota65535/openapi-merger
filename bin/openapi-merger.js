@@ -1,7 +1,7 @@
 'use strict'
 
 const program = require('commander')
-const merger = require('../lib/merger')
+const merger = require('../src/merger')
 
 
 program
@@ -16,20 +16,14 @@ program
         /^.+\.(yaml|yml)$/gi)
     .option('--debug', 'debug mode, such as print error tracks', false)
     .action((args) => {
-        const options = {
+        const params = {
             input: args.input,
             output: args.output,
             debug: args.debug
         }
-        console.debug('options: ', options)
+        console.debug('params: ', params)
 
-        merger(options).catch(e => {
-            if (options.debug) {
-                console.error(e)
-            } else {
-                console.error('Error :' + e.message)
-            }
-        })
+        merger(params)
     })
 
 program.parse(process.argv)
