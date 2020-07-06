@@ -11,11 +11,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "lint-staged && npm test"
     }
   },
   "lint-staged": {
-    "*": "npm run format"
+    "*.js": "npm run format"
   },
   "repository": "https://github.com/kota65535/openapi-merger",
   "author": "kota65535 <kota65535@gmail.com>",
