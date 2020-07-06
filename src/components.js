@@ -1,25 +1,29 @@
 "use strict";
 
 const { readYAML } = require("./yaml");
-const { searchRef } = require("./ref");
+const { searchRef, searchRefAsync, sliceObject } = require("./ref");
 const glob = require("glob");
 const path = require("path");
+const { parseRef } = require("./ref");
+const { download } = require("./http");
 
 const COMPONENTS_DIR = "components";
+const FETCHED_DIR = "fetched";
 
 /**
  * Parse component directory.
  * @param baseDir {string}
  * @returns {array<Component>}
  */
-function createComponents(baseDir) {
+async function createComponents(baseDir) {
   // change cwd
   const cwd = process.cwd();
   process.chdir(baseDir);
 
   try {
     let components = parseComponentDir();
-    resolveRefsInComponents(components);
+    await resolveUrlRefs(components);
+    resolveRemoteRefs(components);
     return components;
   } finally {
     // revert cwd
@@ -60,46 +64,74 @@ function parseComponentDir() {
   let components = [];
   for (const f of filePaths) {
     let name = path.basename(f, path.extname(f));
-    components.push(Component.fromFilePath(f, conflicted.has(name)));
+    components.push(
+      Component.fromFilePath(f, { prependSubSir: conflicted.has(name) })
+    );
   }
   return components;
 }
 
 /**
- * Resolve $ref in components.
+ * Resolve URL refs, with fetching from the URL.
  * @param components {array<Component>}
+ * @returns {Promise<void>}
  */
-function resolveRefsInComponents(components) {
+async function resolveUrlRefs(components) {
+  let promises = [];
+  for (const c of components) {
+    const promise = searchRefAsync(c.content, async (key, val) => {
+      const parsed = parseRef(val);
+      if (!parsed.isHttp()) {
+        return val;
+      }
+      // http URL ref
+      console.info(`Fetching: ${parsed.href}`);
+      const filePath = await download(parsed, FETCHED_DIR);
+      return `${filePath}${parsed.hash || ""}`;
+    });
+    promises.push(promise);
+  }
+  await Promise.all(promises);
+}
+
+/**
+ * Resolve $ref in components.
+ */
+function resolveRemoteRefs(components) {
   for (const c of components) {
     const dir = path.dirname(c.filePath);
     searchRef(c.content, (key, val) => {
-      // local ref
-      if (key.startsWith("#")) {
+      const parsed = parseRef(val);
+      if (!parsed.isRemote()) {
         return val;
       }
-      // TODO: handle URL ref
-
-      const p = path.join(dir, val);
+      // fetched URL ref
+      if (parsed.path.startsWith(FETCHED_DIR)) {
+        return val;
+      }
+      // remote ref
+      const p = path.join(dir, parsed.path);
       const referred = components.find((t) => t.filePath === p);
       if (!referred) {
         console.error(
           `Reference to "${val}" from "${c.filePath}" not resolved.`
         );
+        return val;
       }
-      return referred ? referred.getLocalRef() : val;
+      return `${referred.getLocalRef()}${parsed.hash || ""}`;
     });
   }
 }
 
 class Component {
-  constructor(filePath, type, name) {
+  constructor(filePath, hash, type, name) {
     this.filePath = filePath;
     this.type = type;
     this.name = name;
-    this.content = readYAML(filePath);
+    this.content = sliceObject(readYAML(filePath), hash);
   }
 
-  static fromFilePath(filePath, prependSubSir = true) {
+  static fromFilePath(filePath, { hash = "", prependSubSir = false } = {}) {
     const parsed = path.parse(filePath);
     const dirParts = parsed.dir.split(path.sep);
     const type = dirParts[1];
@@ -112,7 +144,7 @@ class Component {
       name = joinedParts + parsed.name;
       console.info(`Using component name: "${name}" for file: "${filePath}"`);
     }
-    return new Component(filePath, type, name);
+    return new Component(filePath, hash, type, name);
   }
 
   getLocalRef() {

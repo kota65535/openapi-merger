@@ -159,6 +159,9 @@ components:
             - huntingSkill
     Pet:
       type: object
+      required:
+        - id
+        - name
       properties:
         id:
           type: integer
@@ -167,19 +170,6 @@ components:
           type: string
         tag:
           type: string
-        type:
-          type: string
-      discriminator:
-        propertyName: type
-        mapping:
-          cat: '#/components/schemas/Cat'
-          dog: '#/components/schemas/Dog'
-          anotherCat: '#/components/schemas/AnotherCat'
-          onemoreCat: '#/components/schemas/OneMoreCat'
-      required:
-        - id
-        - name
-        - type
     Pets:
       type: array
       items:
