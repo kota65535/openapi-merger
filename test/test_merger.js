@@ -40,5 +40,9 @@ describe('merger', () => {
     it('with discriminator', async () => {
         await runMerger('petstore_3')
     });
+
+    it('schema name conflict', async () => {
+        await runMerger('petstore_4')
+    });
 });
 

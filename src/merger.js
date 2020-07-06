@@ -4,7 +4,7 @@ const path = require('path')
 const yaml = require('./yaml')
 const fs = require('fs-extra')
 const mktemp = require('mktemp')
-const localizeRefs = require('./localize_refs')
+const {createComponents} = require('./components')
 const mergeRefs = require('./merge_refs')
 
 
@@ -16,8 +16,8 @@ async function merger(params) {
     inputDir = path.dirname(input)
     let doc = await yaml.readYAML(input)
 
-    doc = localizeRefs(doc, inputDir)
-    doc = mergeRefs(doc, inputDir)
+    const components = createComponents(inputDir)
+    doc = mergeRefs(doc, inputDir, components)
 
     yaml.writeYAML(doc, params.output)
   } catch (e) {
@@ -47,9 +47,9 @@ async function prepare(inputFile) {
   console.debug(`temporary directory: ${tmpDir}`)
 
   const targets = [
-    { input: inputFile, output: path.join(tmpDir, path.basename(inputFile)) },
-    { input: path.join(inputDir, 'components'), output: path.join(tmpDir, 'components') },
-    { input: path.join(inputDir, 'paths'), output:  path.join(tmpDir, 'paths') }
+    {input: inputFile, output: path.join(tmpDir, path.basename(inputFile))},
+    {input: path.join(inputDir, 'components'), output: path.join(tmpDir, 'components')},
+    {input: path.join(inputDir, 'paths'), output: path.join(tmpDir, 'paths')}
   ]
 
   let promises = []
