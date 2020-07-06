@@ -85,7 +85,6 @@ async function resolveUrlRefs(components) {
         return val;
       }
       // http URL ref
-      console.info(`Fetching: ${parsed.href}`);
       const filePath = await download(parsed, FETCHED_DIR);
       return `${filePath}${parsed.hash || ""}`;
     });
