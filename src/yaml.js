@@ -4,6 +4,10 @@ const path = require("path");
 const fs = require("fs");
 const yaml = require("js-yaml");
 
+function loadYAML(str) {
+  return yaml.safeLoad(str);
+}
+
 function readYAML(filePath) {
   const str = "" + fs.readFileSync(filePath, "utf8");
   return yaml.safeLoad(str);
@@ -14,7 +18,6 @@ function writeYAML(doc, filePath) {
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
-  console.info("writing: " + filePath);
   const dump = yaml.dump(doc);
   fs.writeFileSync(filePath, dump);
 }
@@ -22,4 +25,5 @@ function writeYAML(doc, filePath) {
 module.exports = {
   readYAML,
   writeYAML,
+  loadYAML,
 };

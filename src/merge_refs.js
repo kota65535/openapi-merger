@@ -3,6 +3,8 @@
 const path = require("path");
 const _ = require("lodash");
 const yaml = require("./yaml");
+const { parseRef } = require("./ref");
+const { sliceObject } = require("./ref");
 
 const COMPONENTS_DIR = "components";
 
@@ -62,28 +64,27 @@ function doMergeRefs(doc, relativeDir, components) {
       continue;
     }
 
-    // nothing to do for local ref
-    if (val.startsWith("#")) {
+    const parsed = parseRef(val);
+
+    // local ref
+    if (parsed.isLocal()) {
       ret[key] = val;
       continue;
     }
 
     // remote ref
-    const filePath = path.join(relativeDir, val);
+    const filePath = path.join(relativeDir, parsed.path);
     const c = components.find((c) => c.filePath === filePath);
     if (c) {
-      ret[key] = c.getLocalRef();
+      // component found, replace it to local ref
+      ret[key] = `${c.getLocalRef()}${parsed.hash || ""}`;
       continue;
     }
 
-    const targetObj = yaml.readYAML(filePath);
-    // recursively $include YAML
-    const resolvedObj = doMergeRefs(
-      targetObj,
-      path.dirname(filePath),
-      components
-    );
-    ret = _.merge(ret, resolvedObj);
+    // component not found, merge its content
+    const obj = sliceObject(yaml.readYAML(filePath), parsed.hash);
+    const mergedObj = doMergeRefs(obj, path.dirname(filePath), components);
+    ret = _.merge(ret, mergedObj);
   }
 
   return ret;

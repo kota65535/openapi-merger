@@ -14,9 +14,10 @@ async function merger(params) {
     inputDir = path.dirname(input);
     let doc = await yaml.readYAML(input);
 
-    const components = createComponents(inputDir);
+    const components = await createComponents(inputDir);
     doc = mergeRefs(doc, inputDir, components);
 
+    console.info("Writing: " + params.output);
     yaml.writeYAML(doc, params.output);
   } catch (e) {
     // show error message
