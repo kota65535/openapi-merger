@@ -1,0 +1,2 @@
+description: A representation of an another cat
+$ref: ../Cat.yaml

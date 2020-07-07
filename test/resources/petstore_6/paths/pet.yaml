@@ -1,0 +1,23 @@
+# /pets/{petId}
+get:
+  summary: Info for a specific pet
+  operationId: showPetById
+  tags:
+    - pets
+  parameters:
+    - $ref: ../components/parameters/PetId.yaml
+      in: path
+      required: true
+  responses:
+    '200':
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Pet.yaml
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Error.yaml
