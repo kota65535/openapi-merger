@@ -148,8 +148,9 @@ components:
       type: array
       items:
         $ref: >-
-          #/components/schemas/OAIOpenAPI-SpecificationMasterExamplesV3.0PetstoreComponentsSchemasPet
-    OAIOpenAPI-SpecificationMasterExamplesV3.0PetstoreComponentsSchemasPet:
+          #/components/x-unknown/OAIOpenAPISpecificationMasterExamplesV30PetstoreComponentsSchemasPet
+  x-unknown:
+    OAIOpenAPISpecificationMasterExamplesV30PetstoreComponentsSchemasPet:
       type: object
       required:
         - id
