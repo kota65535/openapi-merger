@@ -78,11 +78,8 @@ function parseComponentDir() {
 
 async function resolveRemoteRefs(components) {
   for (let c of components) {
-    c.content = await resolveRemoteRefsRecursively(
-      c.content,
-      path.dirname(c.filePath),
-      components
-    );
+    const currentDir = path.dirname(c.filePath);
+    c.content = doResolveRemoteRefs(c.content, currentDir, components);
   }
 }
 
@@ -129,76 +126,53 @@ async function resolveUrlRefsRecursively(doc, currentDir, fetched) {
   }
 }
 
-async function resolveRemoteRefsRecursively(doc, currentDir, components) {
+function doResolveRemoteRefs(doc, currentDir, components) {
   // base case
   if (!_.isObject(doc)) {
     return doc;
   }
   let ret = _.isArray(doc) ? [] : {};
   for (const [key, val] of Object.entries(doc)) {
-    if (key === "$ref") {
+    if (key === "$ref" || key === "$include") {
       const parsed = parseRef(val);
-      // nothing to do for local ref
-      if (parsed.isLocal()) {
+      // nothing to do here for local & URL ref
+      if (!parsed.isRemote()) {
         ret[key] = val;
         continue;
       }
 
-      if (parsed.isHttp()) {
-        ret[key] = val;
-        continue;
-      }
-
-      // for remote ref
       const filePath = path.join(currentDir, parsed.path);
-      const comp = components.find((c) => c.filePath === filePath);
-      if (comp) {
-        // component found, replace it by local ref
-        ret[key] = `${comp.getLocalRef()}${parsed.hash || ""}`;
-      }
-    } else if (key === "$include") {
-      const parsed = parseRef(val);
-      // nothing to do for local ref
-      if (parsed.isLocal()) {
+      const cmp = components.find((c) => c.filePath === filePath);
+      if (cmp) {
+        if (key === "$ref") {
+          ret[key] = `${cmp.getLocalRef()}${parsed.hash || ""}`;
+        }
+        if (key === "$include") {
+          const mergedObj = doResolveRemoteRefs(
+            _.cloneDeep(cmp.content),
+            path.dirname(filePath),
+            components
+          );
+          const obj = sliceObject(mergedObj, parsed.hash);
+          ret = _.merge(ret, obj);
+        }
+      } else {
+        console.warn(`Remote ref not resolved. path: ${cmp.filePath}`);
         ret[key] = val;
-        continue;
-      }
-      if (parsed.isHttp()) {
-        // TODO: do something
-        ret[key] = val;
-        continue;
-      }
-
-      // for remote ref
-      const filePath = path.join(currentDir, parsed.path);
-      const comp = components.find((c) => c.filePath === filePath);
-      if (comp) {
-        // component found, replace it by local ref
-        const mergedObj = await resolveRemoteRefsRecursively(
-          _.cloneDeep(comp.content),
-          path.dirname(filePath),
-          components
-        );
-        const obj = sliceObject(mergedObj, parsed.hash);
-        ret = _.merge(ret, obj);
       }
     } else if (key === "discriminator") {
       if (_.isObject(val)) {
         for (const [mkey, mval] of Object.entries(val.mapping)) {
           const filePath = path.join(currentDir, mval);
-          const comp = components.find((c) => c.filePath === filePath);
-          if (comp) {
-            val.mapping[mkey] = comp.getLocalRef();
+          const cmp = components.find((c) => c.filePath === filePath);
+          if (cmp) {
+            val.mapping[mkey] = cmp.getLocalRef();
           }
         }
       }
       ret[key] = val;
     } else {
-      ret[key] = await resolveRemoteRefsRecursively(
-        val,
-        currentDir,
-        components
-      );
+      ret[key] = doResolveRemoteRefs(val, currentDir, components);
     }
   }
 

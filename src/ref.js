@@ -38,11 +38,11 @@ class ParsedRef {
   }
 
   isLocal() {
-    return !this.path;
+    return !this.path && this.hash;
   }
 
   isRemote() {
-    return this.path;
+    return !this.isHttp() && this.path;
   }
 
   isHttp() {
