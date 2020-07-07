@@ -28,8 +28,9 @@ function parseRef(ref) {
 
 class ParsedRef {
   constructor(ref) {
-    const { protocol, href, path, hash } = url.parse(ref);
+    const { protocol, host, href, path, hash } = url.parse(ref);
     this.protocol = protocol;
+    this.host = host;
     this.href = href.replace(hash, "");
     this.path = path;
     this.ext = path ? pathExtName(this.path) : null;

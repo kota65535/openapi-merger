@@ -9,12 +9,10 @@ const { writeYAML, loadYAML } = require("./yaml");
 /**
  * Download from URL.
  * @param parsed {object} object returned by url.parse()
- * @param dir {string}
+ * @param filePath {string}
  * @returns
  */
-async function download(parsed, dir = ".") {
-  const baseName = crypto.createHash("md5").update(parsed.href).digest("hex");
-  const filePath = path.join(dir, `${baseName}${parsed.ext}`);
+async function download(parsed, filePath) {
   console.info(`Fetching: ${parsed.href}`);
   const res = await fetch(parsed.href);
   const t = await res.text();
@@ -26,7 +24,7 @@ async function download(parsed, dir = ".") {
     doc = JSON.parse(t);
   }
   writeYAML(doc, filePath);
-  return { doc, filePath };
+  return doc;
 }
 
 module.exports = {

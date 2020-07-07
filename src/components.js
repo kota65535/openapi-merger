@@ -7,6 +7,7 @@ const path = require("path");
 const _ = require("lodash");
 const { parseRef } = require("./ref");
 const { download } = require("./http");
+const fs = require("fs-extra");
 
 const COMPONENTS_DIR = "components";
 
@@ -22,7 +23,12 @@ async function createComponents(baseDir) {
 
   try {
     let components = parseComponentDir();
-    await resolveRemoteRefs(components);
+    let fetched;
+    do {
+      await resolveRemoteRefs(components);
+      fetched = await resolveUrlRefs(components);
+      components = components.concat(fetched);
+    } while (fetched.length > 0);
     return components;
   } finally {
     // revert cwd
@@ -80,6 +86,49 @@ async function resolveRemoteRefs(components) {
   }
 }
 
+async function resolveUrlRefs(components) {
+  let fetchedComponents = [];
+  for (let c of components) {
+    await resolveUrlRefsRecursively(
+      c.content,
+      path.dirname(c.filePath),
+      fetchedComponents
+    );
+  }
+  return fetchedComponents;
+}
+
+async function resolveUrlRefsRecursively(doc, currentDir, fetched) {
+  // base case
+  if (!_.isObject(doc)) {
+    return;
+  }
+  for (const [key, val] of Object.entries(doc)) {
+    if (key === "$ref" || key === "$include") {
+      const parsed = parseRef(val);
+      if (parsed.isHttp()) {
+        const dir = path.join(parsed.host, path.dirname(parsed.path));
+        fs.mkdirpSync(dir);
+        const filePath = path.join(dir, path.basename(parsed.path));
+        await download(parsed, filePath);
+        let name = path
+          .join(parsed.path, parsed.hash.slice(1))
+          .split("/")
+          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+          .join("");
+
+        name = name.replace(path.extname(parsed.path), "");
+        fetched.push(new Component(filePath, parsed.hash, "schemas", name));
+        // fetched.push(
+        //   Component.fromFilePath(filePath, {hash: parsed.hash, prependSubSir: true}))
+        doc[key] = path.relative(currentDir, filePath);
+      }
+    } else {
+      await resolveUrlRefsRecursively(val, currentDir, fetched);
+    }
+  }
+}
+
 async function resolveRemoteRefsRecursively(doc, currentDir, components) {
   // base case
   if (!_.isObject(doc)) {
@@ -96,7 +145,7 @@ async function resolveRemoteRefsRecursively(doc, currentDir, components) {
       }
 
       if (parsed.isHttp()) {
-        // TODO: do something
+        ret[key] = val;
         continue;
       }
 
@@ -116,6 +165,7 @@ async function resolveRemoteRefsRecursively(doc, currentDir, components) {
       }
       if (parsed.isHttp()) {
         // TODO: do something
+        ret[key] = val;
         continue;
       }
 
@@ -158,6 +208,7 @@ async function resolveRemoteRefsRecursively(doc, currentDir, components) {
 class Component {
   constructor(filePath, hash, type, name) {
     this.filePath = filePath;
+    this.hash = hash;
     this.type = type;
     this.name = name;
     this.content = sliceObject(readYAML(filePath), hash);

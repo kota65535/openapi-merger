@@ -48,7 +48,7 @@ describe("merger", () => {
     await runMerger("petstore_5");
   });
 
-  // it("http ref", async () => {
-  //   await runMerger("petstore_5");
-  // });
+  it("http ref", async () => {
+    await runMerger("petstore_6");
+  });
 });
