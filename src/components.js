@@ -25,7 +25,7 @@ async function createComponents(baseDir) {
     let components = parseComponentDir();
     let fetched;
     do {
-      await resolveRemoteRefs(components);
+      resolveRemoteRefs(components);
       fetched = await resolveUrlRefs(components);
       components = components.concat(fetched);
     } while (fetched.length > 0);
@@ -76,56 +76,24 @@ function parseComponentDir() {
   return components;
 }
 
-async function resolveRemoteRefs(components) {
+/**
+ * Resolve remote refs in components.
+ * @param components {array<Component>}
+ */
+function resolveRemoteRefs(components) {
   for (let c of components) {
     const currentDir = path.dirname(c.filePath);
     c.content = doResolveRemoteRefs(c.content, currentDir, components);
   }
 }
 
-async function resolveUrlRefs(components) {
-  let fetchedComponents = [];
-  for (let c of components) {
-    await resolveUrlRefsRecursively(
-      c.content,
-      path.dirname(c.filePath),
-      fetchedComponents
-    );
-  }
-  return fetchedComponents;
-}
-
-async function resolveUrlRefsRecursively(doc, currentDir, fetched) {
-  // base case
-  if (!_.isObject(doc)) {
-    return;
-  }
-  for (const [key, val] of Object.entries(doc)) {
-    if (key === "$ref" || key === "$include") {
-      const parsed = parseRef(val);
-      if (parsed.isHttp()) {
-        const dir = path.join(parsed.host, path.dirname(parsed.path));
-        fs.mkdirpSync(dir);
-        const filePath = path.join(dir, path.basename(parsed.path));
-        await download(parsed, filePath);
-        let name = path
-          .join(parsed.path, parsed.hash.slice(1))
-          .split("/")
-          .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-          .join("");
-
-        name = name.replace(path.extname(parsed.path), "");
-        fetched.push(new Component(filePath, parsed.hash, "schemas", name));
-        // fetched.push(
-        //   Component.fromFilePath(filePath, {hash: parsed.hash, prependSubSir: true}))
-        doc[key] = path.relative(currentDir, filePath);
-      }
-    } else {
-      await resolveUrlRefsRecursively(val, currentDir, fetched);
-    }
-  }
-}
-
+/**
+ * Resolves remote refs in the given document.
+ * @param doc {object}
+ * @param currentDir {string}
+ * @param components {array<Component>}
+ * @returns {object}
+ */
 function doResolveRemoteRefs(doc, currentDir, components) {
   // base case
   if (!_.isObject(doc)) {
@@ -179,6 +147,36 @@ function doResolveRemoteRefs(doc, currentDir, components) {
   return ret;
 }
 
+async function resolveUrlRefs(components) {
+  const fetchedComponents = [];
+  const promises = [];
+  for (let c of components) {
+    const currentDir = path.dirname(c.filePath);
+    promises.push(doResolveUrlRefs(c.content, currentDir, fetchedComponents));
+  }
+  await Promise.all(promises);
+  return fetchedComponents;
+}
+
+async function doResolveUrlRefs(doc, currentDir, fetched) {
+  // base case
+  if (!_.isObject(doc)) {
+    return;
+  }
+  for (const [key, val] of Object.entries(doc)) {
+    if (key === "$ref" || key === "$include") {
+      const parsed = parseRef(val);
+      if (parsed.isHttp()) {
+        const cmp = await Component.fromURL(parsed);
+        fetched.push(cmp);
+        doc[key] = path.relative(currentDir, cmp.filePath);
+      }
+    } else {
+      await doResolveUrlRefs(val, currentDir, fetched);
+    }
+  }
+}
+
 class Component {
   constructor(filePath, hash, type, name) {
     this.filePath = filePath;
@@ -188,7 +186,24 @@ class Component {
     this.content = sliceObject(readYAML(filePath), hash);
   }
 
-  static fromFilePath(filePath, { hash = "", prependSubSir = false } = {}) {
+  static fromURL = async (parsed) => {
+    const dir = path.join(parsed.host, path.dirname(parsed.path));
+    fs.mkdirpSync(dir);
+    const filePath = path.join(dir, path.basename(parsed.path));
+    await download(parsed, filePath);
+    let name = path
+      .join(parsed.path, parsed.hash.slice(1))
+      .split("/")
+      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+      .join("");
+    name = name.replace(path.extname(parsed.path), "");
+    return new Component(filePath, parsed.hash, "unknown", name);
+  };
+
+  static fromFilePath = (
+    filePath,
+    { hash = "", prependSubSir = false } = {}
+  ) => {
     const parsed = path.parse(filePath);
     const dirParts = parsed.dir.split(path.sep);
     const type = dirParts[1];
@@ -202,7 +217,7 @@ class Component {
       console.info(`Using component name: "${name}" for file: "${filePath}"`);
     }
     return new Component(filePath, hash, type, name);
-  }
+  };
 
   getLocalRef() {
     return `#/${COMPONENTS_DIR}/${this.type}/${this.name}`;
