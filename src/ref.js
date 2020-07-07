@@ -18,23 +18,30 @@ async function searchRef(obj, callback) {
     if (key === "$ref") {
       // delete all keys, because $ref ignores all sibling elements.
       deleteAllKeys(obj);
-      let newVal = await callback(key, val);
-      if (_.isObject(newVal)) {
-        // replace obj by ref content
-        _.merge(obj, newVal);
-      } else {
-        // replace $ref value
-        obj[key] = newVal;
+      const newVal = await callback(key, val);
+      if (newVal) {
+        if (_.isObject(newVal)) {
+          // replace obj by ref content
+          _.merge(obj, newVal);
+        } else {
+          // replace $ref value
+          obj[key] = newVal;
+        }
       }
     } else if (key === "$include") {
-      let newVal = await callback(key, val);
-      // merge ref content into the object, keeping all siblings.
-      _.merge(obj, newVal);
-      delete obj[key];
+      const newVal = await callback(key, val);
+      if (newVal) {
+        // merge ref content into the object, keeping all siblings.
+        _.merge(obj, newVal);
+        delete obj[key];
+      }
     } else if (key === "discriminator") {
       if (_.isObject(val)) {
         for (const [mkey, mval] of Object.entries(val.mapping)) {
-          val.mapping[mkey] = await callback(mkey, mval);
+          const newVal = await callback(mkey, mval);
+          if (newVal) {
+            val.mapping[mkey] = newVal;
+          }
         }
       }
     } else {
