@@ -1,13 +1,13 @@
 "use strict";
 
-const { readYAML } = require("./yaml");
-const { sliceObject } = require("./ref");
 const glob = require("glob");
+const fs = require("fs-extra");
 const path = require("path");
 const _ = require("lodash");
+const { readYAML } = require("./yaml");
+const { sliceObject } = require("./ref");
 const { parseRef } = require("./ref");
 const { download } = require("./http");
-const fs = require("fs-extra");
 
 const COMPONENTS_DIR = "components";
 
@@ -109,6 +109,7 @@ function doResolveRemoteRefs(doc, currentDir, components) {
         continue;
       }
 
+      // for remote ref
       const filePath = path.join(currentDir, parsed.path);
       const cmp = components.find((c) => c.filePath === filePath);
       if (cmp) {
@@ -116,13 +117,13 @@ function doResolveRemoteRefs(doc, currentDir, components) {
           ret[key] = `${cmp.getLocalRef()}${parsed.hash || ""}`;
         }
         if (key === "$include") {
-          const mergedObj = doResolveRemoteRefs(
-            _.cloneDeep(cmp.content),
+          const sliced = sliceObject(cmp.content, parsed.hash);
+          const resolved = doResolveRemoteRefs(
+            _.cloneDeep(sliced),
             path.dirname(filePath),
             components
           );
-          const obj = sliceObject(mergedObj, parsed.hash);
-          ret = _.merge(ret, obj);
+          _.merge(ret, resolved);
         }
       } else {
         console.warn(`Remote ref not resolved. path: ${cmp.filePath}`);

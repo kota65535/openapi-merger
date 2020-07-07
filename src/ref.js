@@ -1,8 +1,7 @@
 "use strict";
 
-const _ = require("lodash");
 const url = require("url");
-const { extname: pathExtName } = require("path");
+const path = require("path");
 
 /**
  * Slice object based on the URL hash (fragment).
@@ -28,13 +27,13 @@ function parseRef(ref) {
 
 class ParsedRef {
   constructor(ref) {
-    const { protocol, host, href, path, hash } = url.parse(ref);
-    this.protocol = protocol;
-    this.host = host;
-    this.href = href.replace(hash, "");
-    this.path = path;
-    this.ext = path ? pathExtName(this.path) : null;
-    this.hash = hash;
+    const u = url.parse(ref);
+    this.protocol = u.protocol;
+    this.host = u.host;
+    this.href = u.href.replace(u.hash, "");
+    this.path = u.path;
+    this.ext = u.path ? path.extname(this.path) : null;
+    this.hash = u.hash;
   }
 
   isLocal() {
