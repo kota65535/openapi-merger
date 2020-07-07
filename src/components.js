@@ -1,7 +1,7 @@
 "use strict";
 
 const { readYAML } = require("./yaml");
-const { searchRef, searchRefAsync, sliceObject } = require("./ref");
+const { searchRef, sliceObject } = require("./ref");
 const glob = require("glob");
 const path = require("path");
 const { parseRef } = require("./ref");
@@ -23,7 +23,7 @@ async function createComponents(baseDir) {
   try {
     let components = parseComponentDir();
     await resolveUrlRefs(components);
-    resolveRemoteRefs(components);
+    await resolveRemoteRefs(components);
     return components;
   } finally {
     // revert cwd
@@ -72,54 +72,58 @@ function parseComponentDir() {
 }
 
 /**
- * Resolve URL refs, with fetching from the URL.
+ * Resolve URL refs by fetching from the URL and replacing it.
  * @param components {array<Component>}
  * @returns {Promise<void>}
  */
 async function resolveUrlRefs(components) {
-  let promises = [];
-  for (const c of components) {
-    const promise = searchRefAsync(c.content, async (key, val) => {
+  const promises = [];
+  for (let c of components) {
+    const promise = searchRef(c.content, async (key, val) => {
       const parsed = parseRef(val);
       if (!parsed.isHttp()) {
         return val;
       }
       // http URL ref
-      const filePath = await download(parsed, FETCHED_DIR);
-      return `${filePath}${parsed.hash || ""}`;
+      const r = await download(parsed, FETCHED_DIR);
+      return sliceObject(r.doc, parsed.hash);
     });
+    console.log(c);
     promises.push(promise);
   }
   await Promise.all(promises);
 }
 
 /**
- * Resolve $ref in components.
+ * Resolve remote refs as local refs.
+ * @param components {array<Component>}
+ * @returns {Promise<void>}
  */
-function resolveRemoteRefs(components) {
+async function resolveRemoteRefs(components) {
+  const promises = [];
   for (const c of components) {
     const dir = path.dirname(c.filePath);
-    searchRef(c.content, (key, val) => {
+    const promise = searchRef(c.content, (key, val) => {
       const parsed = parseRef(val);
       if (!parsed.isRemote()) {
         return val;
       }
-      // fetched URL ref
-      if (parsed.path.startsWith(FETCHED_DIR)) {
-        return val;
-      }
+
       // remote ref
       const p = path.join(dir, parsed.path);
       const referred = components.find((t) => t.filePath === p);
       if (!referred) {
         console.error(
-          `Reference to "${val}" from "${c.filePath}" not resolved.`
+          `Cannot resolve remote reference to: "${val}" from: "${c.filePath}"`
         );
         return val;
       }
+      // convert to local ref
       return `${referred.getLocalRef()}${parsed.hash || ""}`;
     });
+    promises.push(promise);
   }
+  await Promise.all(promises);
 }
 
 class Component {

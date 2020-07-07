@@ -12,7 +12,7 @@ get:
       schema:
         type: integer
         format: int32
-    - $ref: ../components/parameters/PetId.yaml
+    - $include: ../components/parameters/PetId.yaml
       in: query
   responses:
     '200':

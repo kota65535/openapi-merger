@@ -18,9 +18,9 @@ function mergeRefs(doc, baseDir, components) {
   // change cwd
   const cwd = process.cwd();
   process.chdir(baseDir);
+  doc = _.cloneDeep(doc);
 
   try {
-    doc = _.cloneDeep(doc);
     doc = addComponents(doc, components);
     doc = doMergeRefs(doc, "", components);
   } finally {
@@ -46,45 +46,56 @@ function addComponents(doc, components) {
 }
 
 /**
- * Merge by replacing $refs with its file content.
+ * Merge refs with its file content.
  * @param doc {object}
- * @param relativeDir {string}
+ * @param currentDir {string}
  * @param components {array<Component>}
  * @returns {object}
  */
-function doMergeRefs(doc, relativeDir, components) {
+function doMergeRefs(doc, currentDir, components) {
   // base case
   if (!_.isObject(doc)) {
     return doc;
   }
   let ret = _.isArray(doc) ? [] : {};
   for (const [key, val] of Object.entries(doc)) {
-    if (key !== "$ref") {
-      ret[key] = doMergeRefs(val, relativeDir, components);
-      continue;
+    if (key === "$ref") {
+      const parsed = parseRef(val);
+      // nothing to do for local ref
+      if (parsed.isLocal()) {
+        ret[key] = val;
+        continue;
+      }
+
+      // for remote ref
+      const filePath = path.join(currentDir, parsed.path);
+      const comp = components.find((c) => c.filePath === filePath);
+      if (comp) {
+        // component found, replace it by local ref
+        ret[key] = `${comp.getLocalRef()}${parsed.hash || ""}`;
+        continue;
+      }
+
+      // component not found, merge it
+      const obj = sliceObject(yaml.readYAML(filePath), parsed.hash);
+      const mergedObj = doMergeRefs(obj, path.dirname(filePath), components);
+      ret = _.merge(ret, mergedObj);
+    } else if (key === "$include") {
+      const parsed = parseRef(val);
+      let comp;
+      if (parsed.isLocal()) {
+        comp = components.find((c) => c.getLocalRef() === val);
+      } else {
+        const filePath = path.join(currentDir, parsed.path);
+        comp = components.find((c) => c.filePath === filePath);
+      }
+      if (comp) {
+        // component found, merge it
+        _.merge(ret, comp.content);
+      }
+    } else {
+      ret[key] = doMergeRefs(val, currentDir, components);
     }
-
-    const parsed = parseRef(val);
-
-    // local ref
-    if (parsed.isLocal()) {
-      ret[key] = val;
-      continue;
-    }
-
-    // remote ref
-    const filePath = path.join(relativeDir, parsed.path);
-    const c = components.find((c) => c.filePath === filePath);
-    if (c) {
-      // component found, replace it to local ref
-      ret[key] = `${c.getLocalRef()}${parsed.hash || ""}`;
-      continue;
-    }
-
-    // component not found, merge its content
-    const obj = sliceObject(yaml.readYAML(filePath), parsed.hash);
-    const mergedObj = doMergeRefs(obj, path.dirname(filePath), components);
-    ret = _.merge(ret, mergedObj);
   }
 
   return ret;

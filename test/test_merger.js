@@ -43,7 +43,12 @@ describe("merger", () => {
   it("schema name conflict", async () => {
     await runMerger("petstore_4");
   });
+
   it("http ref", async () => {
     await runMerger("petstore_5");
+  });
+
+  it("ref merging", async () => {
+    await runMerger("petstore_6");
   });
 });

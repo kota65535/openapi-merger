@@ -5,7 +5,7 @@ get:
   tags:
     - pets
   parameters:
-    - $ref: ../components/parameters/PetId.yaml
+    - $include: ../components/parameters/PetId.yaml
       in: path
       required: true
   responses:
