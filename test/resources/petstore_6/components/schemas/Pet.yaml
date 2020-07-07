@@ -1,1 +1,21 @@
-$ref: https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml#components/schemas/Pet
+type: object
+properties:
+  id:
+    type: integer
+    format: int64
+  name:
+    type: string
+  tag:
+    type: string
+  type:
+    type: string
+discriminator:
+  propertyName: type
+  mapping:
+    cat: Cat.yaml
+    dog: Dog.yaml
+required:
+  - id
+  - name
+  - type
+
