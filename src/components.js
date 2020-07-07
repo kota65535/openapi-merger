@@ -188,7 +188,7 @@ class Component {
 
   static fromURL = async (parsed) => {
     const dir = path.join(parsed.host, path.dirname(parsed.path));
-    fs.mkdirpSync(dir);
+    await fs.mkdirp(dir);
     const filePath = path.join(dir, path.basename(parsed.path));
     await download(parsed, filePath);
     let name = path
@@ -197,7 +197,8 @@ class Component {
       .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
       .join("");
     name = name.replace(path.extname(parsed.path), "");
-    return new Component(filePath, parsed.hash, "unknown", name);
+    name = name.replace(/\W/g, "");
+    return new Component(filePath, parsed.hash, "x-unknown", name);
   };
 
   static fromFilePath = (
@@ -219,9 +220,9 @@ class Component {
     return new Component(filePath, hash, type, name);
   };
 
-  getLocalRef() {
+  getLocalRef = () => {
     return `#/${COMPONENTS_DIR}/${this.type}/${this.name}`;
-  }
+  };
 }
 
 module.exports = {
