@@ -5,52 +5,6 @@ const url = require("url");
 const { extname: pathExtName } = require("path");
 
 /**
- * Search reference from the given object.
- * @param obj
- * @param callback
- * @returns {Promise<void>}
- */
-async function searchRef(obj, callback) {
-  if (!_.isObject(obj)) {
-    return;
-  }
-  for (const [key, val] of Object.entries(obj)) {
-    if (key === "$ref") {
-      // delete all keys, because $ref ignores all sibling elements.
-      deleteAllKeys(obj);
-      const newVal = await callback(key, val);
-      if (newVal) {
-        if (_.isObject(newVal)) {
-          // replace obj by ref content
-          _.merge(obj, newVal);
-        } else {
-          // replace $ref value
-          obj[key] = newVal;
-        }
-      }
-    } else if (key === "$include") {
-      const newVal = await callback(key, val);
-      if (newVal) {
-        // merge ref content into the object, keeping all siblings.
-        _.merge(obj, newVal);
-        delete obj[key];
-      }
-    } else if (key === "discriminator") {
-      if (_.isObject(val)) {
-        for (const [mkey, mval] of Object.entries(val.mapping)) {
-          const newVal = await callback(mkey, mval);
-          if (newVal) {
-            val.mapping[mkey] = newVal;
-          }
-        }
-      }
-    } else {
-      await searchRef(val, callback);
-    }
-  }
-}
-
-/**
  * Slice object based on the URL hash (fragment).
  * @param obj {object}
  * @param hash {string}
@@ -66,10 +20,6 @@ function sliceObject(obj, hash) {
     return obj;
   });
   return obj;
-}
-
-function deleteAllKeys(obj) {
-  Object.entries(obj).forEach(([k, v]) => delete obj[k]);
 }
 
 function parseRef(ref) {
@@ -101,6 +51,5 @@ class ParsedRef {
 
 module.exports = {
   parseRef,
-  searchRef,
   sliceObject,
 };

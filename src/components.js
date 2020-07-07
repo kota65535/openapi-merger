@@ -1,14 +1,14 @@
 "use strict";
 
 const { readYAML } = require("./yaml");
-const { searchRef, sliceObject } = require("./ref");
+const { sliceObject } = require("./ref");
 const glob = require("glob");
 const path = require("path");
+const _ = require("lodash");
 const { parseRef } = require("./ref");
 const { download } = require("./http");
 
 const COMPONENTS_DIR = "components";
-const FETCHED_DIR = "fetched";
 
 /**
  * Parse component directory.
@@ -22,7 +22,6 @@ async function createComponents(baseDir) {
 
   try {
     let components = parseComponentDir();
-    await resolveUrlRefs(components);
     await resolveRemoteRefs(components);
     return components;
   } finally {
@@ -71,59 +70,89 @@ function parseComponentDir() {
   return components;
 }
 
-/**
- * Resolve URL refs by fetching from the URL and replacing it.
- * @param components {array<Component>}
- * @returns {Promise<void>}
- */
-async function resolveUrlRefs(components) {
-  const promises = [];
+async function resolveRemoteRefs(components) {
   for (let c of components) {
-    const promise = searchRef(c.content, async (key, val) => {
-      const parsed = parseRef(val);
-      if (!parsed.isHttp()) {
-        return val;
-      }
-      // http URL ref
-      const r = await download(parsed, FETCHED_DIR);
-      return sliceObject(r.doc, parsed.hash);
-    });
-    console.log(c);
-    promises.push(promise);
+    c.content = await resolveRemoteRefsRecursively(
+      c.content,
+      path.dirname(c.filePath),
+      components
+    );
   }
-  await Promise.all(promises);
 }
 
-/**
- * Resolve remote refs as local refs.
- * @param components {array<Component>}
- * @returns {Promise<void>}
- */
-async function resolveRemoteRefs(components) {
-  const promises = [];
-  for (const c of components) {
-    const dir = path.dirname(c.filePath);
-    const promise = searchRef(c.content, (key, val) => {
+async function resolveRemoteRefsRecursively(doc, currentDir, components) {
+  // base case
+  if (!_.isObject(doc)) {
+    return doc;
+  }
+  let ret = _.isArray(doc) ? [] : {};
+  for (const [key, val] of Object.entries(doc)) {
+    if (key === "$ref") {
       const parsed = parseRef(val);
-      if (!parsed.isRemote()) {
-        return val;
+      // nothing to do for local ref
+      if (parsed.isLocal()) {
+        ret[key] = val;
+        continue;
       }
 
-      // remote ref
-      const p = path.join(dir, parsed.path);
-      const referred = components.find((t) => t.filePath === p);
-      if (!referred) {
-        console.error(
-          `Cannot resolve remote reference to: "${val}" from: "${c.filePath}"`
-        );
-        return val;
+      if (parsed.isHttp()) {
+        // TODO: do something
+        continue;
       }
-      // convert to local ref
-      return `${referred.getLocalRef()}${parsed.hash || ""}`;
-    });
-    promises.push(promise);
+
+      // for remote ref
+      const filePath = path.join(currentDir, parsed.path);
+      const comp = components.find((c) => c.filePath === filePath);
+      if (comp) {
+        // component found, replace it by local ref
+        ret[key] = `${comp.getLocalRef()}${parsed.hash || ""}`;
+      }
+    } else if (key === "$include") {
+      const parsed = parseRef(val);
+      // nothing to do for local ref
+      if (parsed.isLocal()) {
+        ret[key] = val;
+        continue;
+      }
+      if (parsed.isHttp()) {
+        // TODO: do something
+        continue;
+      }
+
+      // for remote ref
+      const filePath = path.join(currentDir, parsed.path);
+      const comp = components.find((c) => c.filePath === filePath);
+      if (comp) {
+        // component found, replace it by local ref
+        const mergedObj = await resolveRemoteRefsRecursively(
+          _.cloneDeep(comp.content),
+          path.dirname(filePath),
+          components
+        );
+        const obj = sliceObject(mergedObj, parsed.hash);
+        ret = _.merge(ret, obj);
+      }
+    } else if (key === "discriminator") {
+      if (_.isObject(val)) {
+        for (const [mkey, mval] of Object.entries(val.mapping)) {
+          const filePath = path.join(currentDir, mval);
+          const comp = components.find((c) => c.filePath === filePath);
+          if (comp) {
+            val.mapping[mkey] = comp.getLocalRef();
+          }
+        }
+      }
+      ret[key] = val;
+    } else {
+      ret[key] = await resolveRemoteRefsRecursively(
+        val,
+        currentDir,
+        components
+      );
+    }
   }
-  await Promise.all(promises);
+
+  return ret;
 }
 
 class Component {

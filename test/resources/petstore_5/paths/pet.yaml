@@ -5,19 +5,16 @@ get:
   tags:
     - pets
   parameters:
-    - name: petId
+    - $include: ../components/parameters/PetId.yaml
       in: path
       required: true
-      description: The id of the pet to retrieve
-      schema:
-        type: string
   responses:
     '200':
       description: Expected response to a valid request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Pet.yaml
+            $ref: ../components/schemas/pet/Pet.yaml
     default:
       description: unexpected error
       content:

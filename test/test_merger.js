@@ -44,11 +44,11 @@ describe("merger", () => {
     await runMerger("petstore_4");
   });
 
-  it("http ref", async () => {
+  it("merging ref", async () => {
     await runMerger("petstore_5");
   });
 
-  it("ref merging", async () => {
-    await runMerger("petstore_6");
-  });
+  // it("http ref", async () => {
+  //   await runMerger("petstore_5");
+  // });
 });
