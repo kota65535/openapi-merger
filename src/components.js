@@ -13,28 +13,25 @@ const COMPONENTS_DIR = "components";
 const FETCHED_DIR = "fetched";
 
 /**
- * Parse component directory.
- * @param baseDir {string}
+ * Create All Component instances necessary for this OpenAPI document.
+ * @param doc {object}
  * @returns {array<Component>}
  */
-async function createComponents(baseDir) {
-  // change cwd
-  const cwd = process.cwd();
-  process.chdir(baseDir);
+async function createComponents(doc) {
+  // parse and create components
+  let components = parseComponentDir();
+  let fetched = await resolveUrlRefsInPathItems(doc);
+  components = components.concat(fetched);
 
-  try {
-    let components = parseComponentDir();
-    let fetched;
-    do {
-      resolveRemoteRefs(components);
-      fetched = await resolveUrlRefs(components);
-      components = components.concat(fetched);
-    } while (fetched.length > 0);
-    return components;
-  } finally {
-    // revert cwd
-    process.chdir(cwd);
-  }
+  // resolve refs
+  fetched = [];
+  do {
+    resolveRemoteRefs(components);
+    fetched = await resolveUrlRefs(components);
+    components = components.concat(fetched);
+  } while (fetched.length > 0);
+
+  return components;
 }
 
 /**
@@ -138,7 +135,7 @@ function doResolveRemoteRefs(doc, currentDir, components) {
           _.merge(ret, resolved);
         }
       } else {
-        console.warn(`Remote ref not resolved. path: ${cmp.filePath}`);
+        console.warn(`Remote ref not resolved. path: ${filePath}`);
         ret[key] = val;
       }
     } else if (key === "discriminator") {
@@ -163,6 +160,12 @@ function doResolveRemoteRefs(doc, currentDir, components) {
   }
 
   return ret;
+}
+
+async function resolveUrlRefsInPathItems(doc) {
+  const fetchedComponents = [];
+  await doResolveUrlRefs(doc, "", fetchedComponents);
+  return fetchedComponents;
 }
 
 async function resolveUrlRefs(components) {
@@ -220,13 +223,7 @@ class Component {
     const dir = path.dirname(filePath);
     await fs.mkdirp(dir);
     await download(parsed, filePath);
-    let name = path
-      .join(parsed.path, parsed.hash.slice(1))
-      .split("/")
-      .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
-      .join("");
-    name = name.replace(path.extname(parsed.path), "");
-    name = name.replace(/\W/g, "");
+    const name = nameFromUrl(parsed);
     return new Component(filePath, parsed.hash, "schemas", name);
   };
 
@@ -262,6 +259,16 @@ function filePathToUrl(filePath) {
   const dirParts = filePath.split(path.sep);
   const url = `${dirParts[1]}//${dirParts.slice(2).join("/")}`;
   return parseRef(url);
+}
+
+function nameFromUrl(parsed) {
+  const p = parsed.path.slice(0, -parsed.ext.length);
+  let name = path.join(parsed.host, p, parsed.hash.slice(1));
+  name = name.replace(/([\W][\w])/g, (group) =>
+    group.toUpperCase().replace(/\W/, "")
+  );
+  name = name.charAt(0).toUpperCase() + name.slice(1);
+  return name;
 }
 
 module.exports = {

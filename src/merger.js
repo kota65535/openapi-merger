@@ -5,18 +5,30 @@ const yaml = require("./yaml");
 const fs = require("fs-extra");
 const mktemp = require("mktemp");
 const { createComponents } = require("./components");
-const mergeRefs = require("./merge_refs");
+const { mergePathItems, mergeRefs } = require("./merge_refs");
 
 async function merger(params) {
   let input, inputDir;
   try {
+    // prepare working dir
     input = await prepare(params.input);
     inputDir = path.dirname(input);
     let doc = await yaml.readYAML(input);
 
-    const components = await createComponents(inputDir);
-    doc = mergeRefs(doc, inputDir, components);
+    // change cwd
+    const cwd = process.cwd();
+    process.chdir(inputDir);
+    try {
+      // main logic
+      doc = mergePathItems(doc);
+      const components = await createComponents(doc);
+      doc = mergeRefs(doc, components);
+    } finally {
+      // revert cwd
+      process.chdir(cwd);
+    }
 
+    // output
     console.info("Writing: " + params.output);
     yaml.writeYAML(doc, params.output);
   } catch (e) {

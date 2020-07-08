@@ -8,24 +8,66 @@ const { parseRef, sliceObject } = require("./ref");
 const COMPONENTS_DIR = "components";
 
 /**
+ * Merge Operation objects into OpenAPI object (root).
+ * @param doc {object}
+ * @returns {*}
+ */
+function mergePathItems(doc) {
+  doc.paths = doMergePathItems(doc.paths, "", 0);
+  return doc;
+}
+
+function doMergePathItems(obj, currentDir, depth) {
+  if (!_.isObject(obj)) {
+    return obj;
+  }
+  // Operation object is 2 levels down from Paths object
+  // $ref under Operation object is not merged in this step
+  let shouldMerge = depth <= 2;
+  let ret = _.isArray(obj) ? [] : {};
+  for (const [key, val] of Object.entries(obj)) {
+    ret[key] = val;
+    if (key === "$ref" || key === "$include") {
+      const parsed = parseRef(val);
+      if (!parsed.isRemote()) {
+        continue;
+      }
+      // Remote ref
+      const filePath = path.join(currentDir, val);
+      if (shouldMerge) {
+        const sliced = sliceObject(readYAML(filePath), parsed.hash);
+        const resolved = doMergePathItems(
+          _.cloneDeep(sliced),
+          path.dirname(filePath),
+          depth
+        );
+        _.merge(ret, resolved);
+        delete ret[key];
+      } else {
+        ret[key] = filePath;
+      }
+    } else if (key === "discriminator") {
+      if (_.isObject(val)) {
+        for (const [mkey, mval] of Object.entries(val.mapping)) {
+          val.mapping[mkey] = path.join(currentDir, mval);
+        }
+      }
+    } else {
+      ret[key] = doMergePathItems(val, currentDir, depth + 1);
+    }
+  }
+  return ret;
+}
+
+/**
  * Merge remote $refs.
  * @param doc {object} OpenAPI doc object
- * @param baseDir {string}
  * @param components {array<Component>}
  */
-function mergeRefs(doc, baseDir, components) {
-  // change cwd
-  const cwd = process.cwd();
-  process.chdir(baseDir);
+function mergeRefs(doc, components) {
   doc = _.cloneDeep(doc);
-
-  try {
-    doc = addComponents(doc, components);
-    doc = doMergeRefs(doc, "", components);
-  } finally {
-    // revert cwd
-    process.chdir(cwd);
-  }
+  doc = addComponents(doc, components);
+  doc = doMergeRefs(doc, "", components);
   return doc;
 }
 
@@ -99,4 +141,7 @@ function doMergeRefs(doc, currentDir, components) {
   return ret;
 }
 
-module.exports = mergeRefs;
+module.exports = {
+  mergePathItems,
+  mergeRefs,
+};

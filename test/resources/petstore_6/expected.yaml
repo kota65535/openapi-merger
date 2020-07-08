@@ -38,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
     post:
       summary: Create a pet
       operationId: createPets
@@ -52,7 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
   '/pets/{petId}':
     get:
       summary: Info for a specific pet
@@ -72,47 +72,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Pet'
+                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
 components:
   schemas:
-    Cat:
-      description: A representation of a cat
-      allOf:
-        - $ref: '#/components/schemas/Pet'
-        - type: object
-          properties:
-            huntingSkill:
-              type: string
-              description: The measured skill for hunting
-              default: lazy
-              enum:
-                - clueless
-                - lazy
-                - adventurous
-                - aggressive
-          required:
-            - huntingSkill
-    Dog:
-      description: A representation of a dog
-      allOf:
-        - $ref: '#/components/schemas/Pet'
-        - type: object
-          properties:
-            packSize:
-              type: integer
-              format: int32
-              description: the size of the pack the dog is from
-              default: 0
-              minimum: 0
-          required:
-            - packSize
-    Error:
+    Pets:
+      type: array
+      items:
+        $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
+    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError:
       type: object
       required:
         - code
@@ -123,7 +96,7 @@ components:
           format: int32
         message:
           type: string
-    Pet:
+    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet:
       type: object
       properties:
         id:
@@ -138,37 +111,16 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          cat: '#/components/schemas/Cat'
-          dog: '#/components/schemas/Dog'
+          cat: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasCat'
+          dog: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasDog'
       required:
         - id
         - name
         - type
-    Pets:
-      type: array
-      items:
-        $ref: '#/components/schemas/Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
-    Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasPet:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        name:
-          type: string
-        tag:
-          type: string
-        type:
-          type: string
-      discriminator: Dog.yaml
-      required:
-        - id
-        - name
-        - type
-    Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasCat:
+    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasCat:
       description: A representation of a cat
       allOf:
-        - $ref: '#/components/schemas/Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
+        - $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
         - type: object
           properties:
             huntingSkill:
@@ -182,10 +134,10 @@ components:
                 - aggressive
           required:
             - huntingSkill
-    Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasDog:
+    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasDog:
       description: A representation of a dog
       allOf:
-        - $ref: '#/components/schemas/Kota65535OpenapimergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
+        - $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
         - type: object
           properties:
             packSize:

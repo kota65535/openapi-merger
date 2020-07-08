@@ -17,10 +17,10 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Pet.yaml
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_3/components/schemas/Pet.yaml
     default:
       description: unexpected error
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Error.yaml
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_3/components/schemas/Error.yaml
