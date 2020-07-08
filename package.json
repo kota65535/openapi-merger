@@ -1,6 +1,6 @@
 {
   "name": "openapi-merger",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "main": "index.js",
   "bin": {
     "openapi-merger": "./bin/openapi-merger.js"
@@ -19,7 +19,12 @@
     "*.js": "npm run format"
   },
   "repository": "https://github.com/kota65535/openapi-merger",
-  "keywords": ["openapi", "swagger", "merge", "merger"],
+  "keywords": [
+    "openapi",
+    "swagger",
+    "merge",
+    "merger"
+  ],
   "author": "kota65535 <kota65535@gmail.com>",
   "license": "MIT",
   "dependencies": {
