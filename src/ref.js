@@ -33,7 +33,7 @@ class ParsedRef {
     this.href = u.href.replace(u.hash, "");
     this.path = u.path;
     this.ext = u.path ? path.extname(this.path) : null;
-    this.hash = u.hash;
+    this.hash = u.hash || "";
   }
 
   isLocal() {

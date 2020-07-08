@@ -10,6 +10,7 @@ const { parseRef } = require("./ref");
 const { download } = require("./http");
 
 const COMPONENTS_DIR = "components";
+const FETCHED_DIR = "fetched";
 
 /**
  * Parse component directory.
@@ -136,6 +137,11 @@ function doResolveRemoteRefs(doc, currentDir, components) {
           const cmp = components.find((c) => c.filePath === filePath);
           if (cmp) {
             val.mapping[mkey] = cmp.getLocalRef();
+          } else {
+            if (currentDir.startsWith(FETCHED_DIR)) {
+              const parsed = filePathToUrl(path.join(currentDir, mval));
+              val.mapping[mkey] = parsed.href;
+            }
           }
         }
       }
@@ -172,6 +178,17 @@ async function doResolveUrlRefs(doc, currentDir, fetched) {
         fetched.push(cmp);
         doc[key] = path.relative(currentDir, cmp.filePath);
       }
+    } else if (key === "discriminator") {
+      if (_.isObject(val)) {
+        for (const [mkey, mval] of Object.entries(val.mapping)) {
+          const parsed = parseRef(mval);
+          if (parsed.isHttp()) {
+            const cmp = await Component.fromURL(parsed);
+            fetched.push(cmp);
+            doc[key] = path.relative(currentDir, cmp.filePath);
+          }
+        }
+      }
     } else {
       await doResolveUrlRefs(val, currentDir, fetched);
     }
@@ -188,9 +205,9 @@ class Component {
   }
 
   static fromURL = async (parsed) => {
-    const dir = path.join(parsed.host, path.dirname(parsed.path));
+    const filePath = urlToFilePath(parsed);
+    const dir = path.dirname(filePath);
     await fs.mkdirp(dir);
-    const filePath = path.join(dir, path.basename(parsed.path));
     await download(parsed, filePath);
     let name = path
       .join(parsed.path, parsed.hash.slice(1))
@@ -224,6 +241,16 @@ class Component {
   getLocalRef = () => {
     return `#/${COMPONENTS_DIR}/${this.type}/${this.name}`;
   };
+}
+
+function urlToFilePath(parsed) {
+  return path.join(FETCHED_DIR, parsed.protocol, parsed.host, parsed.path);
+}
+
+function filePathToUrl(filePath) {
+  const dirParts = filePath.split(path.sep);
+  const url = `${dirParts[1]}//${dirParts.slice(2).join("/")}`;
+  return parseRef(url);
 }
 
 module.exports = {

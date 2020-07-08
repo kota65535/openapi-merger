@@ -23,7 +23,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Pets.yaml
+            $ref: ../components/schemas/pets/Pets.yaml
     default:
       description: unexpected error
       content:
