@@ -49,32 +49,40 @@ async function createComponents(baseDir) {
  */
 function parseComponentDir() {
   const filePaths = glob.sync(`${COMPONENTS_DIR}/**/*.@(yml|yaml)`);
-  let names = new Set();
+  let registered = new Set();
   let conflicted = new Set();
-  for (const f of filePaths) {
-    const parsed = path.parse(f);
-    const name = parsed.name;
+
+  function parseComponentName(filePath) {
+    const parsed = path.parse(filePath);
     const type = parsed.dir.split(path.sep)[1];
+    const name = parsed.name;
+    return { type, name };
+  }
+
+  for (const f of filePaths) {
+    const { type, name } = parseComponentName(f);
+    const tn = `${type}${name}`;
     // check name conflict
-    if (names.has(name)) {
-      if (!conflicted.has(name)) {
+    if (registered.has(tn)) {
+      if (!conflicted.has(tn)) {
         console.warn(
           `Component name conflicts. type: "${type}", name: "${name}"`
         );
       }
-      conflicted.add(name);
+      conflicted.add(tn);
     }
-    names.add(name);
+    registered.add(tn);
   }
 
   let components = [];
   for (const f of filePaths) {
-    let name = path.basename(f, path.extname(f));
+    const { type, name } = parseComponentName(f);
+    const tn = `${type}${name}`;
     if (name.startsWith("_")) {
       continue;
     }
     components.push(
-      Component.fromFilePath(f, { prependSubSir: conflicted.has(name) })
+      Component.fromFilePath(f, { prependSubSir: conflicted.has(tn) })
     );
   }
   return components;
