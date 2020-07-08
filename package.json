@@ -1,6 +1,6 @@
 {
   "name": "openapi-merger",
-  "version": "0.2.0-0",
+  "version": "0.2.0-1",
   "main": "index.js",
   "bin": {
     "openapi-merger": "./bin/openapi-merger.js"
