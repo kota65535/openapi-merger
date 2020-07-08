@@ -1,6 +1,6 @@
-description: A representation of one more cat
+description: A representation of a cat
 allOf:
-  - $ref: ../../Pet.yaml
+  - $ref: Pet.yaml
   - type: object
     properties:
       huntingSkill:

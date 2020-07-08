@@ -1,57 +1,7 @@
 "use strict";
 
-const _ = require("lodash");
 const url = require("url");
-const { extname: pathExtName } = require("path");
-
-/**
- * Search reference fields in given object.
- * @param obj {object}
- * @param callback {function} function called when any reference found
- */
-function searchRef(obj, callback) {
-  if (!_.isObject(obj)) {
-    return;
-  }
-  for (const [key, val] of Object.entries(obj)) {
-    if (key === "$ref") {
-      obj[key] = callback(key, val);
-    } else if (key === "discriminator") {
-      if (_.isObject(val)) {
-        for (const [mkey, mval] of Object.entries(val.mapping)) {
-          val.mapping[mkey] = callback(mkey, mval);
-        }
-      }
-    } else {
-      searchRef(val, callback);
-    }
-  }
-}
-
-/**
- * Async version of searchRef.
- * @param obj
- * @param callback
- * @returns {Promise<void>}
- */
-async function searchRefAsync(obj, callback) {
-  if (!_.isObject(obj)) {
-    return;
-  }
-  for (const [key, val] of Object.entries(obj)) {
-    if (key === "$ref") {
-      obj[key] = await callback(key, val);
-    } else if (key === "discriminator") {
-      if (_.isObject(val)) {
-        for (const [mkey, mval] of Object.entries(val.mapping)) {
-          val.mapping[mkey] = await callback(mkey, mval);
-        }
-      }
-    } else {
-      await searchRefAsync(val, callback);
-    }
-  }
-}
+const path = require("path");
 
 /**
  * Slice object based on the URL hash (fragment).
@@ -77,20 +27,21 @@ function parseRef(ref) {
 
 class ParsedRef {
   constructor(ref) {
-    const { protocol, href, path, hash } = url.parse(ref);
-    this.protocol = protocol;
-    this.href = href;
-    this.path = path;
-    this.ext = path ? pathExtName(this.path) : null;
-    this.hash = hash;
+    const u = url.parse(ref);
+    this.protocol = u.protocol;
+    this.host = u.host;
+    this.href = u.href.replace(u.hash, "");
+    this.path = u.path;
+    this.ext = u.path ? path.extname(this.path) : null;
+    this.hash = u.hash || "";
   }
 
   isLocal() {
-    return !this.path;
+    return !this.path && this.hash;
   }
 
   isRemote() {
-    return this.path;
+    return !this.isHttp() && this.path;
   }
 
   isHttp() {
@@ -100,7 +51,5 @@ class ParsedRef {
 
 module.exports = {
   parseRef,
-  searchRef,
-  searchRefAsync,
   sliceObject,
 };

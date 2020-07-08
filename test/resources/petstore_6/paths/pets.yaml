@@ -12,8 +12,6 @@ get:
       schema:
         type: integer
         format: int32
-    - $include: ../components/parameters/PetId.yaml
-      in: query
   responses:
     '200':
       description: A paged array of pets
@@ -25,7 +23,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Pets.yaml
+            $ref: ../components/schemas/pets/Pets.yaml
     default:
       description: unexpected error
       content:
