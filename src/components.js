@@ -216,7 +216,7 @@ class Component {
       .join("");
     name = name.replace(path.extname(parsed.path), "");
     name = name.replace(/\W/g, "");
-    return new Component(filePath, parsed.hash, "x-unknown", name);
+    return new Component(filePath, parsed.hash, "schemas", name);
   };
 
   static fromFilePath = (

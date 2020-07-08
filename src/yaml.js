@@ -18,7 +18,7 @@ function writeYAML(doc, filePath) {
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
-  const dump = yaml.safeDump(doc);
+  const dump = yaml.safeDump(doc, { lineWidth: 1000 });
   fs.writeFileSync(filePath, dump);
 }
 
