@@ -1,13 +1,14 @@
 # openapi-merger
 
-merge multiple OpenAPI files into a single file.  
-
+Yet another CLI tool for merging multiple OpenAPI files into a single file.
 
 ## Features
-- almost the same as [swagger-merger](https://github.com/WindomZ/swagger-merger)
-- convert all remote refs into local refs, rather than simply replacing them by its content. 
-  This is useful on code generation using [openapi-generator](https://github.com/OpenAPITools/openapi-generator), 
-  because it prevents generating duplicate model classes.
+- Similar to [swagger-merger](https://github.com/WindomZ/swagger-merger)
+- Convert all remote & URL refs into local refs
+  - This is useful on code generation, because it helps [openapi-generator](https://github.com/OpenAPITools/openapi-generator)
+    to output unique model classes without duplication.
+- `$include` keyword: same as `$ref`, except it merges the object with sibling elements. (`$ref` ignores them)
+
 
 ## Prerequisites
 
@@ -34,4 +35,7 @@ merge multiple OpenAPI files into a single file.
 $ npm install -g openapi-merger
 $ openapi-merger -i openapi.yaml -o out.yaml
 ```
+
+## Examples
+
 
