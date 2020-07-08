@@ -70,6 +70,9 @@ function parseComponentDir() {
   let components = [];
   for (const f of filePaths) {
     let name = path.basename(f, path.extname(f));
+    if (name.startsWith("_")) {
+      continue;
+    }
     components.push(
       Component.fromFilePath(f, { prependSubSir: conflicted.has(name) })
     );
