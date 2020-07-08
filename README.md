@@ -36,6 +36,3 @@ $ npm install -g openapi-merger
 $ openapi-merger -i openapi.yaml -o out.yaml
 ```
 
-## Examples
-
-
