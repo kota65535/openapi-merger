@@ -3,7 +3,7 @@
 const fs = require("fs-extra");
 const path = require("path");
 const glob = require("glob");
-const merger = require("../src/merger");
+const main = require("../src/main");
 const assert = require("chai").assert;
 
 const runMerger = async (name) => {
@@ -12,7 +12,7 @@ const runMerger = async (name) => {
     output: path.join("resources", name, "out.yaml"),
     debug: true,
   };
-  await merger(params);
+  await main(params);
   assert.equal(
     "" + fs.readFileSync(params.output),
     "" + fs.readFileSync(path.join("resources", name, "expected.yaml"))

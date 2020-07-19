@@ -81,7 +81,24 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    AnotherCat:
+    Cat1:
+      description: A representation of a cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              default: lazy
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Cat2:
       description: A representation of an another cat
       allOf:
         - $ref: '#/components/schemas/Pet'
@@ -98,8 +115,8 @@ components:
                 - aggressive
           required:
             - huntingSkill
-    Cat:
-      description: A representation of a cat
+    Cat3:
+      description: A representation of one more cat
       allOf:
         - $ref: '#/components/schemas/Pet'
         - type: object
@@ -140,23 +157,6 @@ components:
           format: int32
         message:
           type: string
-    OneMoreCat:
-      description: A representation of one more cat
-      allOf:
-        - $ref: '#/components/schemas/Pet'
-        - type: object
-          properties:
-            huntingSkill:
-              type: string
-              description: The measured skill for hunting
-              default: lazy
-              enum:
-                - clueless
-                - lazy
-                - adventurous
-                - aggressive
-          required:
-            - huntingSkill
     Pet:
       type: object
       properties:
@@ -172,10 +172,10 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          cat: '#/components/schemas/Cat'
+          cat: '#/components/schemas/Cat1'
           dog: '#/components/schemas/Dog'
-          anotherCat: '#/components/schemas/AnotherCat'
-          onemoreCat: '#/components/schemas/OneMoreCat'
+          anotherCat: '#/components/schemas/Cat2'
+          onemoreCat: '#/components/schemas/Cat3'
       required:
         - id
         - name

@@ -1,27 +1,49 @@
 "use strict";
 
 const fetch = require("node-fetch");
-const { writeYAML, loadYAML } = require("./yaml");
+const _ = require("lodash");
+const { loadYAML } = require("./yaml");
+
+const cache = {};
 
 /**
  * Download from URL.
- * @param parsed {object} object returned by url.parse()
- * @param filePath {string}
+ * @param url {string}
  * @returns
  */
-async function download(parsed, filePath) {
-  console.info(`Fetching: ${parsed.href}`);
-  const res = await fetch(parsed.href);
-  const t = await res.text();
+async function download(url) {
+  if (cache[url]) {
+    return _.cloneDeep(cache[url]);
+  }
+
+  console.info(`Fetching: ${url}`);
+  let res;
+  try {
+    res = await fetch(url);
+  } catch (e) {
+    console.error(`Failed to fetch: ${url}`);
+    return {};
+  }
+  if (!res.ok) {
+    console.error(`${res.status} returned: ${url}`);
+    return {};
+  }
+
+  const body = await res.text();
   let doc;
-  if (parsed.ext.match(/\.(yml|yaml)$/)) {
-    doc = loadYAML(t);
+  if (url.match(/\.(yml|yaml)$/)) {
+    doc = loadYAML(body);
+  } else if (url.match(/\.json$/)) {
+    doc = JSON.parse(body);
+  } else {
+    console.warn(`Cannot determine the file type: ${url}`);
+    // assume YAML for now
+    doc = loadYAML(body);
   }
-  if (parsed.ext.match(/\.json$/)) {
-    doc = JSON.parse(t);
-  }
-  writeYAML(doc, filePath);
-  return doc;
+
+  cache[url] = doc;
+
+  return _.cloneDeep(doc);
 }
 
 module.exports = {

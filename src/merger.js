@@ -1,83 +1,136 @@
 "use strict";
 
-const path = require("path");
-const yaml = require("./yaml");
-const fs = require("fs-extra");
-const mktemp = require("mktemp");
-const { createComponents } = require("./components");
-const { mergePathItems, mergeRefs } = require("./merge_refs");
+const Path = require("path");
+const Url = require("url");
+const _ = require("lodash");
+const { readYAML } = require("./yaml");
+const { getRefType } = require("./ref");
+const { download } = require("./http");
+const { sliceObject } = require("./util");
+const { ComponentManager, ComponentNameResolver } = require("./components");
 
-async function merger(params) {
-  let input, inputDir;
-  try {
-    // prepare working dir
-    input = await prepare(params.input);
-    inputDir = path.dirname(input);
-    let doc = await yaml.readYAML(input);
+class Merger {
+  constructor() {
+    this.manager = new ComponentManager();
+  }
 
-    // change cwd
-    const cwd = process.cwd();
-    process.chdir(inputDir);
-    try {
-      // main logic
-      doc = mergePathItems(doc);
-      const components = await createComponents(doc);
-      doc = mergeRefs(doc, components);
-    } finally {
-      // revert cwd
-      process.chdir(cwd);
+  /**
+   * merge OpenAPI document.
+   * @param doc {object} OpenAPI object
+   * @param inputDir {string} directory where the doc is located
+   * @returns merged OpenAPI object
+   */
+  merge = async (doc, inputDir) => {
+    const currentDir = Path.join(process.cwd(), inputDir);
+
+    // 1st: list all components
+    this.manager = new ComponentManager();
+    await this.mergeRefs(doc.paths, currentDir, "$.paths");
+
+    // resolve component names
+    const nameResolver = new ComponentNameResolver(this.manager.components);
+
+    // 2nd: merge them all
+    this.manager = new ComponentManager(nameResolver);
+    doc.paths = await this.mergeRefs(doc.paths, currentDir, "$.paths");
+    doc.components = this.manager.getComponentsSection();
+    return doc;
+  };
+
+  mergeRefs = async (obj, dir, jsonPath) => {
+    if (!_.isObject(obj)) {
+      return obj;
+    }
+    let ret = _.isArray(obj) ? [] : {};
+    for (const [key, val] of Object.entries(obj)) {
+      ret[key] = val;
+      if (key === "$ref") {
+        await this.handleRef(ret, key, val, dir, jsonPath);
+      } else if (key.match(/^\$include(#.*)?/)) {
+        await this.handleInclude(ret, key, val, dir, jsonPath);
+      } else if (key === "discriminator") {
+        await this.handleDiscriminator(ret, key, val, dir, jsonPath);
+      } else {
+        ret[key] = await this.mergeRefs(val, dir, `${jsonPath}.${key}`);
+      }
+    }
+    return ret;
+  };
+
+  handleRef = async (ret, key, val, dir, jsonPath) => {
+    const url = parseUrl(val);
+    if (url.isLocal()) {
+      return;
     }
 
-    // output
-    console.info("Writing: " + params.output);
-    yaml.writeYAML(doc, params.output);
-  } catch (e) {
-    // show error message
-    if (params.debug) {
-      console.error(e);
+    const refType = getRefType(jsonPath);
+    if (refType === "unknown") {
+      await this.handleInclude(ret, key, val, dir, jsonPath);
+      return;
+    }
+
+    let cmp, nextDir;
+    if (url.isHttp()) {
+      cmp = await this.manager.getOrCreate(refType, url.href);
+      nextDir = Path.dirname(url.href);
     } else {
-      console.error("Error :" + e.message);
+      // Remote Ref
+      const dirUrl = parseUrl(dir);
+      let href;
+      if (dirUrl.isHttp()) {
+        href = Url.resolve(dir + "/", val);
+      } else {
+        href = Path.join(dir, val);
+      }
+      cmp = await this.manager.getOrCreate(refType, href);
+      nextDir = Path.dirname(href);
     }
-  } finally {
-    // remove temporary directory
-    await fs.remove(inputDir);
-    console.debug("removed temporary directory.");
-  }
+    ret[key] = cmp.getLocalRef();
+    cmp.content = await this.mergeRefs(cmp.content, nextDir, jsonPath);
+  };
+
+  handleInclude = async (ret, key, val, dir, jsonPath) => {
+    const url = parseUrl(val);
+    if (url.isLocal()) {
+      return;
+    }
+    let content, nextDir;
+    if (url.isHttp()) {
+      content = await download(url.href);
+      nextDir = Path.dirname(url.href);
+    } else {
+      // Remote Ref
+      const filePath = Path.join(dir, val);
+      content = readYAML(filePath);
+      nextDir = Path.dirname(filePath);
+    }
+    const sliced = sliceObject(content, url.hash);
+    const merged = await this.mergeRefs(sliced, nextDir, jsonPath);
+    _.merge(ret, merged);
+    delete ret[key];
+  };
+
+  handleDiscriminator = async (ret, key, val, dir, jsonPath) => {
+    if (!val.mapping) {
+      return;
+    }
+    for (const [mkey, mval] of Object.entries(val.mapping)) {
+      await this.handleRef(
+        val.mapping,
+        mkey,
+        mval,
+        dir,
+        `${jsonPath}.discriminator.${mkey}`
+      );
+    }
+  };
 }
 
-/**
- * Create temporary working directory.
- * @param inputFile {string}
- * @returns {Promise<*>}
- */
-async function prepare(inputFile) {
-  const inputDir = path.dirname(inputFile);
-  const tmpDir = await mktemp.createDir(path.join(inputDir, "XXXXX.tmp"));
-
-  console.debug(`temporary directory: ${tmpDir}`);
-
-  const targets = [
-    { input: inputFile, output: path.join(tmpDir, path.basename(inputFile)) },
-    {
-      input: path.join(inputDir, "components"),
-      output: path.join(tmpDir, "components"),
-    },
-    { input: path.join(inputDir, "paths"), output: path.join(tmpDir, "paths") },
-  ];
-
-  let promises = [];
-  for (const target of targets) {
-    try {
-      fs.accessSync(target.input);
-      promises.push(fs.copy(target.input, target.output));
-    } catch (e) {
-      console.info(`failed to access: ${target.input}`);
-    }
-  }
-
-  await Promise.all(promises);
-
-  return path.join(tmpDir, path.basename(inputFile));
+function parseUrl(url) {
+  let ret = Url.parse(url);
+  ret.isLocal = () => !ret.path && ret.hash;
+  ret.isHttp = () => ret.protocol && ret.protocol.match(/^(http|https):/);
+  return ret;
 }
 
-module.exports = merger;
+module.exports = Merger;

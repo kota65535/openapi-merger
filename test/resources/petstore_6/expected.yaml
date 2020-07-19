@@ -38,7 +38,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
+                $ref: '#/components/schemas/Error'
     post:
       summary: Create a pet
       operationId: createPets
@@ -52,7 +52,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
+                $ref: '#/components/schemas/Error'
   '/pets/{petId}':
     get:
       summary: Info for a specific pet
@@ -72,20 +72,47 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
+                $ref: '#/components/schemas/Pet'
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError'
+                $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Pets:
-      type: array
-      items:
-        $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
-    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasError:
+    Cat:
+      description: A representation of a cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              default: lazy
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Dog:
+      description: A representation of a dog
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            packSize:
+              type: integer
+              format: int32
+              description: the size of the pack the dog is from
+              default: 0
+              minimum: 0
+          required:
+            - packSize
+    Error:
       type: object
       required:
         - code
@@ -96,7 +123,7 @@ components:
           format: int32
         message:
           type: string
-    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet:
+    Pet:
       type: object
       properties:
         id:
@@ -111,40 +138,13 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          cat: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasCat'
-          dog: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasDog'
+          cat: '#/components/schemas/Cat'
+          dog: '#/components/schemas/Dog'
       required:
         - id
         - name
         - type
-    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasCat:
-      description: A representation of a cat
-      allOf:
-        - $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
-        - type: object
-          properties:
-            huntingSkill:
-              type: string
-              description: The measured skill for hunting
-              default: lazy
-              enum:
-                - clueless
-                - lazy
-                - adventurous
-                - aggressive
-          required:
-            - huntingSkill
-    RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasDog:
-      description: A representation of a dog
-      allOf:
-        - $ref: '#/components/schemas/RawGithubusercontentComKota65535OpenapiMergerMasterTestResourcesPetstore_3ComponentsSchemasPet'
-        - type: object
-          properties:
-            packSize:
-              type: integer
-              format: int32
-              description: the size of the pack the dog is from
-              default: 0
-              minimum: 0
-          required:
-            - packSize
+    Pets:
+      type: array
+      items:
+        $ref: '#/components/schemas/Pet'

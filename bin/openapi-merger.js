@@ -2,7 +2,7 @@
 "use strict";
 
 const program = require("commander");
-const merger = require("../src/merger");
+const main = require("../src/main");
 
 function validate(val, pattern, message) {
   if (val.match(pattern)) {
@@ -37,7 +37,7 @@ program
     };
     console.debug("params: ", params);
 
-    merger(params);
+    main(params);
   });
 
 program.parse(process.argv);

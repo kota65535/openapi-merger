@@ -85,24 +85,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 components:
-  parameters:
-    PetId:
-      name: petId
-      description: The id of the pet to retrieve
-      schema:
-        type: string
   schemas:
-    Error:
-      type: object
-      required:
-        - code
-        - message
-      properties:
-        code:
-          type: integer
-          format: int32
-        message:
-          type: string
     Cat:
       description: A representation of a cat
       allOf:
@@ -134,6 +117,17 @@ components:
               minimum: 0
           required:
             - packSize
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
     Pet:
       type: object
       properties:
