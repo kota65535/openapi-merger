@@ -84,20 +84,22 @@ class ComponentNameResolver {
   }
 
   initMap(components) {
-    const nameToCs = {};
+    const nameToCmps = {};
     for (const c of components) {
       const { path, hash } = Url.parse(c.url);
       const name = hash
         ? Path.basename(hash)
         : Path.basename(path, Path.extname(path));
-      if (nameToCs[name]) {
-        nameToCs[name].push(c);
+      const key = `${name},${c.type}`;
+      if (nameToCmps[key]) {
+        nameToCmps[key].push(c);
       } else {
-        nameToCs[name] = [c];
+        nameToCmps[key] = [c];
       }
     }
     const cToName = {};
-    for (const [name, components] of Object.entries(nameToCs)) {
+    for (const [key, components] of Object.entries(nameToCmps)) {
+      const [name, type] = key.split(",");
       if (components.length === 1) {
         cToName[components[0].url] = name;
       } else {
