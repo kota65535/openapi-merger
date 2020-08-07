@@ -21,7 +21,7 @@ class Merger {
    * @returns merged OpenAPI object
    */
   merge = async (doc, inputDir) => {
-    const currentDir = Path.join(process.cwd(), inputDir);
+    const currentDir = Path.resolve(process.cwd(), inputDir);
 
     // 1st: list all components
     this.manager = new ComponentManager();
