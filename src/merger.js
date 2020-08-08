@@ -4,7 +4,7 @@ const Path = require("path");
 const Url = require("url");
 const _ = require("lodash");
 const { readYAML } = require("./yaml");
-const { getRefType } = require("./ref");
+const { getRefType, shouldInclude } = require("./ref");
 const { download } = require("./http");
 const { sliceObject } = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
@@ -64,7 +64,7 @@ class Merger {
     }
 
     const refType = getRefType(jsonPath);
-    if (refType === "unknown") {
+    if (shouldInclude(refType)) {
       await this.handleInclude(ret, key, val, dir, jsonPath);
       return;
     }

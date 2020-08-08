@@ -27,13 +27,15 @@ const REF_TYPES = {
   },
   schemas: (path) => {
     return path.match(
-      /(not|allOf|oneOf|anyOf|items|additionalProperties|schema|discriminator\.[a-zA-Z0-9\.\-_]+)$/
+      /(not|allOf|oneOf|anyOf|items|additionalProperties|schema|(properties|discriminator)\.[a-zA-Z0-9\.\-_]+)$/
     );
   },
-  // pathItems: (path) => {
-  //   return path.match(/paths\.\/[^\.]*$/);
-  // },
+  pathItems: (path) => {
+    return path.match(/paths\.\/[^\.]*$/);
+  },
 };
+
+const INCLUDABLE = new Set(["pathItems", "unknown"]);
 
 function getRefType(path) {
   for (const [k, v] of Object.entries(REF_TYPES)) {
@@ -41,9 +43,15 @@ function getRefType(path) {
       return k;
     }
   }
+  console.log(`unknown component type "${path}" : fallback to include`);
   return "unknown";
+}
+
+function shouldInclude(type) {
+  return INCLUDABLE.has(type);
 }
 
 module.exports = {
   getRefType,
+  shouldInclude,
 };
