@@ -4,6 +4,7 @@ get:
   operationId: listPets
   tags:
     - pets
+    - $include: ../components/tags.yaml
   parameters:
     - name: limit
       in: query

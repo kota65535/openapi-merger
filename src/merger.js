@@ -47,11 +47,17 @@ class Merger {
       if (key === "$ref") {
         await this.handleRef(ret, key, val, dir, jsonPath);
       } else if (key.match(/^\$include(#.*)?/)) {
-        await this.handleInclude(ret, key, val, dir, jsonPath);
+        ret = await this.handleInclude(ret, key, val, dir, jsonPath);
       } else if (key === "discriminator") {
         await this.handleDiscriminator(ret, key, val, dir, jsonPath);
       } else {
-        ret[key] = await this.mergeRefs(val, dir, `${jsonPath}.${key}`);
+        const merged = await this.mergeRefs(val, dir, `${jsonPath}.${key}`);
+        if (_.isArray(ret) && _.isArray(merged)) {
+          ret.splice(Number(key), 1);
+          ret = ret.concat(merged);
+        } else {
+          ret[key] = merged;
+        }
       }
     }
     return ret;
@@ -106,8 +112,19 @@ class Merger {
     }
     const sliced = sliceObject(content, url.hash);
     const merged = await this.mergeRefs(sliced, nextDir, jsonPath);
-    _.merge(ret, merged);
-    delete ret[key];
+    if (_.isArray(merged)) {
+      if (Object.keys(ret).length === 1) {
+        ret = merged;
+      } else {
+        throw new Error(
+          `cannot merge array content object. $include: ${val} at jsonPath=${jsonPath}`
+        );
+      }
+    } else {
+      _.merge(ret, merged);
+      delete ret[key];
+    }
+    return ret;
   };
 
   handleDiscriminator = async (ret, key, val, dir, jsonPath) => {

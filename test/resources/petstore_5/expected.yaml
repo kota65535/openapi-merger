@@ -13,6 +13,8 @@ paths:
       operationId: listPets
       tags:
         - pets
+        - tag1
+        - tag2
       parameters:
         - name: limit
           in: query
@@ -63,7 +65,8 @@ paths:
       summary: Info for a specific pet
       operationId: showPetById
       tags:
-        - pets
+        - tag1
+        - tag2
       parameters:
         - name: petId
           description: The id of the pet to retrieve

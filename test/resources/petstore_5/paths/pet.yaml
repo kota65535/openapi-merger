@@ -3,7 +3,7 @@ get:
   summary: Info for a specific pet
   operationId: showPetById
   tags:
-    - pets
+    $include: ../components/tags.yaml
   parameters:
     - $include: ../components/parameters/PetId.yaml
       in: path
