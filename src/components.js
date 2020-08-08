@@ -97,16 +97,17 @@ class ComponentNameResolver {
       }
     }
     const cToName = {};
-    for (const [key, components] of Object.entries(nameToCmps)) {
+    for (const [key, cmps] of Object.entries(nameToCmps)) {
       const [name, type] = key.split(",");
-      if (components.length === 1) {
-        cToName[components[0].url] = name;
+      if (cmps.length === 1) {
+        cToName[cmps[0].url] = name;
       } else {
-        for (let i = 0; i < components.length; i++) {
+        cmps.sort((f, s) => strCmp(f.url, s.url));
+        for (let i = 0; i < cmps.length; i++) {
           const resolved = `${name}${i + 1}`;
-          cToName[components[i].url] = resolved;
+          cToName[cmps[i].url] = resolved;
           console.warn(
-            `conflicted component name "${name}" resolved to "${resolved}". url=${components[i].url}`
+            `conflicted component name "${name}" resolved to "${resolved}". url=${cmps[i].url}`
           );
         }
       }
@@ -117,6 +118,10 @@ class ComponentNameResolver {
   resolve = (url) => {
     return this.map[url];
   };
+}
+
+function strCmp(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 module.exports = {

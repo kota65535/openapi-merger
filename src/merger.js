@@ -88,14 +88,15 @@ class Merger {
       cmp = await this.manager.getOrCreate(refType, href);
       nextFile = pFile.hrefWoHash;
     } else {
-      let href;
+      let target;
       if (pFile.isHttp) {
-        href = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
+        target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
-        href = Path.join(Path.dirname(pFile.path), pRef.href);
+        target = Path.join(Path.dirname(pFile.hrefWoHash), val);
       }
-      cmp = await this.manager.getOrCreate(refType, href);
-      nextFile = parseUrl(href).hrefWoHash;
+      const parsedTarget = parseUrl(target);
+      cmp = await this.manager.getOrCreate(refType, target);
+      nextFile = parsedTarget.hrefWoHash;
     }
     ret[key] = cmp.getLocalRef();
     cmp.content = await this.mergeRefs(cmp.content, nextFile, jsonPath);
@@ -107,7 +108,7 @@ class Merger {
 
     let content, nextFile;
     if (pRef.isHttp) {
-      content = await download(pRef.href);
+      content = await download(pRef.hrefWoHash);
       nextFile = pRef.hrefWoHash;
     } else if (pRef.isLocal) {
       // avoid infinite loop
@@ -117,15 +118,19 @@ class Merger {
       content = readYAML(file);
       nextFile = pFile.hrefWoHash;
     } else {
-      let href;
+      let target;
       if (pFile.isHttp) {
-        href = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
+        target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
-        href = Path.join(Path.dirname(pFile.path), pRef.href);
+        target = Path.join(Path.dirname(pFile.hrefWoHash), val);
       }
-      const filePath = parseUrl(href).path;
-      content = readYAML(filePath);
-      nextFile = filePath;
+      const parsedTarget = parseUrl(target);
+      if (parsedTarget.isHttp) {
+        content = await download(parsedTarget.hrefWoHash);
+      } else {
+        content = readYAML(parsedTarget.hrefWoHash);
+      }
+      nextFile = parsedTarget.hrefWoHash;
     }
     const sliced = sliceObject(content, pRef.hash);
     const merged = await this.mergeRefs(sliced, nextFile, jsonPath);
