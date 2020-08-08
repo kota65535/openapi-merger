@@ -4,7 +4,7 @@ get:
   operationId: listPets
   tags:
     - pets
-    - $include: ../components/tags.yaml
+    - $include: https://raw.githubusercontent.com/kota65535/openapi-merger/feature/v0.3/test/resources/petstore_6/components/tags.yaml#/tags/pets
   parameters:
     - name: limit
       in: query

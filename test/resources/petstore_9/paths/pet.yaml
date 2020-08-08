@@ -3,7 +3,7 @@ get:
   summary: Info for a specific pet
   operationId: showPetById
   tags:
-    $include: ../components/tags.yaml
+    $include: https://raw.githubusercontent.com/kota65535/openapi-merger/feature/v0.3/test/resources/petstore_6/components/tags.yaml#/tags/pet
   parameters:
     - $include: ../components/parameters/PetId.yaml
       in: path

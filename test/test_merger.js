@@ -60,7 +60,11 @@ describe("merger", () => {
     await runMerger("petstore_7");
   });
 
-  it("with http ref and hash", async () => {
+  it("with http ref & hash", async () => {
     await runMerger("petstore_8");
+  });
+
+  it("with $include http ref", async () => {
+    await runMerger("petstore_9");
   });
 });
