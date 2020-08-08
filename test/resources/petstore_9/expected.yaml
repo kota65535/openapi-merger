@@ -13,8 +13,8 @@ paths:
       operationId: listPets
       tags:
         - pets
-        - tag3
-        - tag4
+        - tag1
+        - tag2
       parameters:
         - name: limit
           in: query

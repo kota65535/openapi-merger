@@ -1,2 +1,7 @@
-- tag1
-- tag2
+tags:
+  pet:
+    - tag1
+    - tag2
+  pets:
+    - tag3
+    - tag4
