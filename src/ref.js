@@ -1,55 +1,57 @@
-"use strict";
+// cf. https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v3.0/schema.json
+//     https://github.com/OAI/OpenAPI-Specification/tree/master/versions
+const REF_TYPES = {
+  parameters: (path) => {
+    return path.match(/parameters.\d+$/);
+  },
+  responses: (path) => {
+    return path.match(/responses\.(default|\d{3})$/);
+  },
+  examples: (path) => {
+    return path.match(/examples$/);
+  },
+  requestBody: (path) => {
+    return path.match(/requestBody$/);
+  },
+  headers: (path) => {
+    return path.match(/headers$/);
+  },
+  securitySchemes: (path) => {
+    return path.match(/securitySchemes\.[a-zA-Z0-9.-_]+$/);
+  },
+  links: (path) => {
+    return path.match(/links$/);
+  },
+  callbacks: (path) => {
+    return path.match(/callbacks\.[a-zA-Z0-9.-_]+$/);
+  },
+  schemas: (path) => {
+    return path.match(
+      /(not|allOf|oneOf|anyOf|items|additionalProperties|schema|(properties|discriminator)\.[a-zA-Z0-9\.\-_]+)$/
+    );
+  },
+  pathItems: (path) => {
+    return path.match(/paths\.\/[^\.]*$/);
+  },
+};
 
-const url = require("url");
-const path = require("path");
+const INCLUDABLE = new Set(["pathItems", "unknown"]);
 
-/**
- * Slice object based on the URL hash (fragment).
- * @param obj {object}
- * @param hash {string}
- * @returns {object}
- */
-function sliceObject(obj, hash) {
-  if (!hash || !hash.startsWith("#")) {
-    return obj;
+function getRefType(path) {
+  for (const [k, v] of Object.entries(REF_TYPES)) {
+    if (v(path)) {
+      return k;
+    }
   }
-  hash = hash.substr(1);
-  hash.split("/").every((k) => {
-    obj = Object.getOwnPropertyDescriptor(obj, k).value;
-    return obj;
-  });
-  return obj;
+  console.log(`unknown component type at "${path}". fallback to include.`);
+  return "unknown";
 }
 
-function parseRef(ref) {
-  return new ParsedRef(ref);
-}
-
-class ParsedRef {
-  constructor(ref) {
-    const u = url.parse(ref);
-    this.protocol = u.protocol;
-    this.host = u.host;
-    this.href = u.href.replace(u.hash, "");
-    this.path = u.path;
-    this.ext = u.path ? path.extname(this.path) : null;
-    this.hash = u.hash || "";
-  }
-
-  isLocal() {
-    return !this.path && this.hash;
-  }
-
-  isRemote() {
-    return !this.isHttp() && this.path;
-  }
-
-  isHttp() {
-    return this.protocol && this.protocol.match(/^(http|https):/);
-  }
+function shouldInclude(type) {
+  return INCLUDABLE.has(type);
 }
 
 module.exports = {
-  parseRef,
-  sliceObject,
+  getRefType,
+  shouldInclude,
 };

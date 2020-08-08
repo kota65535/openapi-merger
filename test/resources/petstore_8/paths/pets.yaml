@@ -23,13 +23,13 @@ get:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Pets.yaml
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/feature/v0.3/test/resources/petstore_4/components/schemas.yaml#/Pets
     default:
       description: unexpected error
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Error.yaml
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/feature/v0.3/test/resources/petstore_4/components/schemas.yaml#/Error
 post:
   summary: Create a pet
   operationId: createPets
@@ -43,4 +43,4 @@ post:
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/Error.yaml
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/feature/v0.3/test/resources/petstore_4/components/schemas.yaml#/Error

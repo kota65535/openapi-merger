@@ -9,30 +9,79 @@ Yet another CLI tool for merging multiple OpenAPI files into a single file.
     to output unique model classes without duplication.
 - `$include` keyword: same as `$ref`, except it merges the object with sibling elements. (`$ref` ignores them)
 
-
-## Prerequisites
-
-- This tool assumes following directory structure, 
-  that reflects the structure of [Components section](https://swagger.io/docs/specification/components/#structure) and
-  all definitions (schema, parameter, etc) are separated into each file. 
-- See 'example' directory for more detail.
-
-```
-.
-├── components
-│   ├── parameters
-│   │   └── Limit.yaml
-│   └── schemas
-│       ├── Error.yaml
-│       ├── Pet.yaml
-│       └── Pets.yaml
-└── openapi.yaml
-```
-
 ## Usage
 
 ```sh
 $ npm install -g openapi-merger
 $ openapi-merger -i openapi.yaml -o out.yaml
 ```
+
+## $include keyword
+
+There are some patterns for $include usage.
+- merge object into object
+- merge object into array
+- merge array into array
+
+### merge object into object
+- object.yml
+```yaml
+key1: val1
+key2: val2
+```
+- main.yml
+```yaml
+map:
+  $include: ./object.yml
+  key3: val3
+```
+- results in:
+```yaml
+map:
+  key1: val1
+  key2: val2
+  key3: val3
+``` 
+
+### merge object into array
+- object.yml
+```yaml
+key1: val1
+key2: val2
+```
+- main.yml
+```yaml
+array:
+  - $include: ./object.yml
+  - key3: val3
+    key4: val4
+```
+- results in:
+```yaml
+map:
+  - key1: val1
+    key2: val2
+  - key3: val3
+    key4: val4
+``` 
+
+### merge array into array
+- array.yml
+```yaml
+- val1
+- val2
+```
+- main.yml
+```yaml
+array:
+  - $include: ./array.yml
+  - val3
+```
+- results in:
+```yaml
+array:
+  - val1
+  - val2
+  - val3
+``` 
 
