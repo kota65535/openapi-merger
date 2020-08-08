@@ -43,7 +43,7 @@ function getRefType(path) {
       return k;
     }
   }
-  console.log(`unknown component type "${path}" : fallback to include`);
+  console.log(`unknown component type at "${path}". fallback to include.`);
   return "unknown";
 }
 

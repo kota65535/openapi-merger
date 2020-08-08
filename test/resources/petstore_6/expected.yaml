@@ -13,6 +13,8 @@ paths:
       operationId: listPets
       tags:
         - pets
+        - tag1
+        - tag2
       parameters:
         - name: limit
           in: query
@@ -21,6 +23,11 @@ paths:
           schema:
             type: integer
             format: int32
+        - name: petId
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+          in: query
       responses:
         '200':
           description: A paged array of pets
@@ -58,14 +65,15 @@ paths:
       summary: Info for a specific pet
       operationId: showPetById
       tags:
-        - pets
+        - tag1
+        - tag2
       parameters:
         - name: petId
-          in: path
-          required: true
           description: The id of the pet to retrieve
           schema:
             type: string
+          in: path
+          required: true
       responses:
         '200':
           description: Expected response to a valid request
@@ -147,4 +155,23 @@ components:
     Pets:
       type: array
       items:
-        $ref: '#/components/schemas/Pet'
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+          name:
+            type: string
+          tag:
+            type: string
+          type:
+            type: string
+        discriminator:
+          propertyName: type
+          mapping:
+            cat: '#/components/schemas/Cat'
+            dog: '#/components/schemas/Dog'
+        required:
+          - id
+          - name
+          - type

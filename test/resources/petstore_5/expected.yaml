@@ -13,8 +13,6 @@ paths:
       operationId: listPets
       tags:
         - pets
-        - tag1
-        - tag2
       parameters:
         - name: limit
           in: query
@@ -23,11 +21,6 @@ paths:
           schema:
             type: integer
             format: int32
-        - name: petId
-          description: The id of the pet to retrieve
-          schema:
-            type: string
-          in: query
       responses:
         '200':
           description: A paged array of pets
@@ -65,15 +58,14 @@ paths:
       summary: Info for a specific pet
       operationId: showPetById
       tags:
-        - tag1
-        - tag2
+        - pets
       parameters:
         - name: petId
+          in: path
+          required: true
           description: The id of the pet to retrieve
           schema:
             type: string
-          in: path
-          required: true
       responses:
         '200':
           description: Expected response to a valid request
@@ -89,8 +81,42 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Cat:
+    Cat1:
       description: A representation of a cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              default: lazy
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Cat2:
+      description: A representation of an another cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              default: lazy
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Cat3:
+      description: A representation of one more cat
       allOf:
         - $ref: '#/components/schemas/Pet'
         - type: object
@@ -146,8 +172,10 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          cat: '#/components/schemas/Cat'
+          cat: '#/components/schemas/Cat1'
           dog: '#/components/schemas/Dog'
+          anotherCat: '#/components/schemas/Cat2'
+          onemoreCat: '#/components/schemas/Cat3'
       required:
         - id
         - name
@@ -155,23 +183,4 @@ components:
     Pets:
       type: array
       items:
-        type: object
-        properties:
-          id:
-            type: integer
-            format: int64
-          name:
-            type: string
-          tag:
-            type: string
-          type:
-            type: string
-        discriminator:
-          propertyName: type
-          mapping:
-            cat: '#/components/schemas/Cat'
-            dog: '#/components/schemas/Dog'
-        required:
-          - id
-          - name
-          - type
+        $ref: '#/components/schemas/Pet'

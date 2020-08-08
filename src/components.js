@@ -1,10 +1,9 @@
 "use strict";
 
 const Path = require("path");
-const Url = require("url");
 const { readYAML } = require("./yaml");
 const { download } = require("./http");
-const { sliceObject } = require("./util");
+const { sliceObject, parseUrl } = require("./util");
 
 class Component {
   constructor(type, name, content, url) {
@@ -38,10 +37,10 @@ class ComponentManager {
     } else {
       name = Buffer.from(url).toString("base64");
     }
-    const { protocol, href, path, hash } = Url.parse(url);
+    const { isHttp, hrefWoHash, path, hash } = parseUrl(url);
     let content;
-    if (protocol && protocol.match(/http:|https:/)) {
-      content = await download(href);
+    if (isHttp) {
+      content = await download(hrefWoHash);
     } else {
       content = readYAML(path);
     }
@@ -86,7 +85,7 @@ class ComponentNameResolver {
   initMap(components) {
     const nameToCmps = {};
     for (const c of components) {
-      const { path, hash } = Url.parse(c.url);
+      const { path, hash } = parseUrl(c.url);
       const name = hash
         ? Path.basename(hash)
         : Path.basename(path, Path.extname(path));
@@ -104,7 +103,11 @@ class ComponentNameResolver {
         cToName[components[0].url] = name;
       } else {
         for (let i = 0; i < components.length; i++) {
-          cToName[components[i].url] = `${name}${i + 1}`;
+          const resolved = `${name}${i + 1}`;
+          cToName[components[i].url] = resolved;
+          console.warn(
+            `conflicted component name "${name}" resolved to "${resolved}". url=${components[i].url}`
+          );
         }
       }
     }

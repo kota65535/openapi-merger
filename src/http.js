@@ -16,7 +16,7 @@ async function download(url) {
     return _.cloneDeep(cache[url]);
   }
 
-  console.info(`Fetching: ${url}`);
+  console.info(`fetching: ${url}`);
   let res;
   try {
     res = await fetch(url);

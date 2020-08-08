@@ -14,7 +14,7 @@ paths:
       tags:
         - pets
       parameters:
-        - $ref: ./components/parameters/Limit.yaml
+        - $ref: "components/Limit.yaml"
       responses:
         '200':
           description: A paged array of pets
@@ -26,13 +26,13 @@ paths:
           content:
             application/json:    
               schema:
-                $ref: "components/schemas/Pets.yaml"
+                $ref: "components/Pets.yaml"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "components/schemas/Error.yaml"
+                $ref: "components/Error.yaml"
     post:
       summary: Create a pet
       operationId: createPets
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/schemas/Error.yaml"
+                $ref: "components/Error.yaml"
   /pets/{petId}:
     get:
       summary: Info for a specific pet
@@ -66,10 +66,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "components/schemas/Pet.yaml"
+                $ref: "components/Pet.yaml"
         default:
           description: unexpected error
           content:
             application/json:
               schema:
-                $ref: "components/schemas/Error.yaml"
+                $ref: "components/Error.yaml"

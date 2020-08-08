@@ -1,16 +1,14 @@
 "use strict";
 
-const path = require("path");
 const yaml = require("./yaml");
 const Merger = require("./merger");
 
 async function main(params) {
-  const inputDir = path.dirname(params.input);
   try {
     let doc = await yaml.readYAML(params.input);
 
     const merger = new Merger();
-    doc = await merger.merge(doc, inputDir);
+    doc = await merger.merge(doc, params.input);
 
     yaml.writeYAML(doc, params.output);
   } catch (e) {

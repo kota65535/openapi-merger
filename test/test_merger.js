@@ -32,6 +32,10 @@ describe("merger", () => {
     await runMerger("petstore");
   });
 
+  it("with hash", async () => {
+    await runMerger("petstore_1");
+  });
+
   it("with paths dir", async () => {
     await runMerger("petstore_2");
   });
@@ -40,15 +44,23 @@ describe("merger", () => {
     await runMerger("petstore_3");
   });
 
-  it("schema name conflict", async () => {
+  it("with discriminator & hash", async () => {
     await runMerger("petstore_4");
   });
 
-  it("merging ref", async () => {
+  it("with schema name conflict", async () => {
     await runMerger("petstore_5");
   });
 
-  it("http ref", async () => {
+  it("with $include", async () => {
     await runMerger("petstore_6");
+  });
+
+  it("with http ref", async () => {
+    await runMerger("petstore_7");
+  });
+
+  it("with http ref and hash", async () => {
+    await runMerger("petstore_8");
   });
 });

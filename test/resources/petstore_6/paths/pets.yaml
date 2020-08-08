@@ -4,6 +4,7 @@ get:
   operationId: listPets
   tags:
     - pets
+    - $include: ../components/tags.yaml
   parameters:
     - name: limit
       in: query
@@ -12,6 +13,8 @@ get:
       schema:
         type: integer
         format: int32
+    - $include: ../components/parameters/PetId.yaml
+      in: query
   responses:
     '200':
       description: A paged array of pets
@@ -29,7 +32,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_3/components/schemas/Error.yaml
+            $ref: ../components/schemas/Error.yaml
 post:
   summary: Create a pet
   operationId: createPets
@@ -43,4 +46,4 @@ post:
       content:
         application/json:
           schema:
-            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_3/components/schemas/Error.yaml
+            $ref: ../components/schemas/Error.yaml

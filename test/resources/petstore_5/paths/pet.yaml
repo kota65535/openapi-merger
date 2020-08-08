@@ -3,18 +3,21 @@ get:
   summary: Info for a specific pet
   operationId: showPetById
   tags:
-    $include: ../components/tags.yaml
+    - pets
   parameters:
-    - $include: ../components/parameters/PetId.yaml
+    - name: petId
       in: path
       required: true
+      description: The id of the pet to retrieve
+      schema:
+        type: string
   responses:
     '200':
       description: Expected response to a valid request
       content:
         application/json:
           schema:
-            $ref: ../components/schemas/pet/Pet.yaml
+            $ref: ../components/schemas/Pet.yaml
     default:
       description: unexpected error
       content:
