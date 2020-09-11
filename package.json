@@ -34,7 +34,7 @@
     "js-yaml": "^3.14.0",
     "lodash": "^4.17.19",
     "mktemp": "^1.0.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^2.6.1"
   },
   "devDependencies": {
     "chai": "^4.2.0",
