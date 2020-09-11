@@ -8,3 +8,11 @@ servers:
   - url: http://petstore.swagger.io/v1
 paths:
   $ref: ./paths/_index.yaml
+components:
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: 'https://api.example.com/auth/token'
+
