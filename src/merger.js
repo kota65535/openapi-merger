@@ -34,7 +34,10 @@ class Merger {
     // 2nd merge: merge them all
     this.manager = new ComponentManager(nameResolver);
     doc.paths = await this.mergeRefs(doc.paths, currentFile, "$.paths");
-    doc.components = this.manager.getComponentsSection();
+    doc.components = _.merge(
+      doc.components,
+      this.manager.getComponentsSection()
+    );
     return doc;
   };
 

@@ -80,6 +80,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 components:
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: 'https://api.example.com/auth/token'
   schemas:
     Cat1:
       description: A representation of a cat
