@@ -98,7 +98,7 @@ class ComponentNameResolver {
     }
     const cToName = {};
     for (const [key, cmps] of Object.entries(nameToCmps)) {
-      const [name, type] = key.split(",");
+      const [name] = key.split(",");
       if (cmps.length === 1) {
         cToName[cmps[0].url] = name;
       } else {
