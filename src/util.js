@@ -8,6 +8,7 @@ function sliceObject(obj, hash) {
   }
   hash = hash.substr(2);
   hash.split("/").every((k) => {
+    k = escapeJsonPointer(k);
     obj = Object.getOwnPropertyDescriptor(obj, k).value;
     return obj;
   });
@@ -22,7 +23,43 @@ function parseUrl(url) {
   return ret;
 }
 
+function filterObject(obj, keyPattern) {
+  if (!keyPattern) {
+    return obj;
+  }
+  let ret = {};
+  for (const [key, val] of Object.entries(obj)) {
+    if (key.match(keyPattern)) {
+      ret[key] = val;
+    }
+  }
+  return ret;
+}
+
+function escapeJsonPointer(str) {
+  let out = "";
+  for (let i = 0; i < str.length; i++) {
+    if (str[i] === "~" && i < str.length - 1) {
+      switch (str[i + 1]) {
+        case "0":
+          out += "~";
+          break;
+        case "1":
+          out += "/";
+          break;
+        default:
+          throw new Error(`invalid escape sequence '~${str[i + 1]}'`);
+      }
+      i++;
+    } else {
+      out += str[i];
+    }
+  }
+  return out;
+}
+
 module.exports = {
   sliceObject,
   parseUrl,
+  filterObject,
 };

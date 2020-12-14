@@ -6,10 +6,12 @@ const _ = require("lodash");
 const { readYAML } = require("./yaml");
 const { getRefType, shouldInclude } = require("./ref");
 const { download } = require("./http");
-const { sliceObject, parseUrl } = require("./util");
+const { sliceObject, parseUrl, filterObject } = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
 
 class Merger {
+  static INCLUDE_PATTERN = /^\$include(#.*?)?(\/.*?\/)?$/;
+
   constructor() {
     this.manager = new ComponentManager();
   }
@@ -50,7 +52,7 @@ class Merger {
       ret[key] = val;
       if (key === "$ref") {
         await this.handleRef(ret, key, val, file, jsonPath);
-      } else if (key.match(/^\$include(#.*)?/)) {
+      } else if (key.match(Merger.INCLUDE_PATTERN)) {
         ret = await this.handleInclude(ret, key, val, file, jsonPath);
       } else if (key === "discriminator") {
         await this.handleDiscriminator(ret, key, val, file, jsonPath);
@@ -109,6 +111,8 @@ class Merger {
     const pRef = parseUrl(val);
     const pFile = parseUrl(file);
 
+    const keyPattern = getKeyPattern(key);
+
     let content, nextFile;
     if (pRef.isHttp) {
       content = await download(pRef.hrefWoHash);
@@ -148,7 +152,8 @@ class Merger {
       }
     } else {
       // merge object
-      _.merge(ret, merged);
+      const filtered = filterObject(merged, keyPattern);
+      _.merge(ret, filtered);
       delete ret[key];
     }
     return ret;
@@ -173,6 +178,12 @@ class Merger {
         );
     }
   };
+}
+
+function getKeyPattern(key) {
+  const groups = key.match(Merger.INCLUDE_PATTERN);
+  const pattern = groups ? groups[2] : null;
+  return pattern ? pattern.substr(1, pattern.length - 2) : null;
 }
 
 module.exports = Merger;

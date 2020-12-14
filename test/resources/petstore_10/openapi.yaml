@@ -1,0 +1,17 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: http://petstore.swagger.io/v1
+paths:
+  $include/^\/pets$/: ./paths/_index.yaml
+components:
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: 'https://api.example.com/auth/token'
