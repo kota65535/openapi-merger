@@ -28,7 +28,7 @@ class Merger {
 
     // 1st merge: list all components
     this.manager = new ComponentManager();
-    await this.mergeRefs(doc.paths, currentFile, "$.paths");
+    await this.mergeRefs(doc.paths, currentFile, "$");
 
     // resolve component names in case of conflict
     const nameResolver = new ComponentNameResolver(this.manager.components);
