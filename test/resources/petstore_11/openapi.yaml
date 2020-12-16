@@ -1,0 +1,14 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  $include: ./servers.yaml
+paths:
+  $include/^\/pets$/: ./paths/_index.yaml
+components:
+  $include: ./securitySchemes.yaml
+tags:
+  $include: ./tags.yaml#/tags

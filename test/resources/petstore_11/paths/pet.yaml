@@ -1,0 +1,23 @@
+# /pets/{petId}
+get:
+  summary: Info for a specific pet
+  operationId: showPetById
+  tags:
+    $include: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_6/components/tags.yaml#/tags/pet
+  parameters:
+    - $include: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_6/components/parameters/PetId.yaml
+      in: path
+      required: true
+  responses:
+    '200':
+      description: Expected response to a valid request
+      content:
+        application/json:
+          schema:
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_6/components/schemas/pet/Pet.yaml
+    default:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/master/test/resources/petstore_6/components/schemas/Error.yaml
