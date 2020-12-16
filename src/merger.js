@@ -142,8 +142,11 @@ class Merger {
     const sliced = sliceObject(content, pRef.hash);
     const merged = await this.mergeRefs(sliced, nextFile, jsonPath);
     if (_.isArray(merged)) {
-      // merge array
-      if (Object.keys(ret).length === 1) {
+      if (_.isArray(ret)) {
+        // merge array
+        ret = ret.concat(merged);
+      } else if (Object.keys(ret).length === 1) {
+        // object having one and only $include key, turn into array.
         ret = merged;
       } else {
         throw new Error(

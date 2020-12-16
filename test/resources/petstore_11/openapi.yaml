@@ -11,4 +11,5 @@ paths:
 components:
   $include: ./securitySchemes.yaml
 tags:
-  $include: ./tags.yaml#/tags
+  $include#1: ./tags1.yaml#/tags
+  $include#2: ./tags2.yaml#/tags

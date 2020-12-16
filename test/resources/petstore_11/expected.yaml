@@ -157,3 +157,5 @@ components:
 tags:
   - name: pets
     description: API for pets
+  - name: pets2
+    description: API for pets2
