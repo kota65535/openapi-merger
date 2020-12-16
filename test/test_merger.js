@@ -71,4 +71,8 @@ describe("merger", () => {
   it("with $include with key pattern", async () => {
     await runMerger("petstore_10");
   });
+
+  it("$include anywhere", async () => {
+    await runMerger("petstore_11");
+  });
 });
