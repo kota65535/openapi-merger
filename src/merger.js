@@ -2,6 +2,7 @@
 
 const Path = require("path");
 const Url = require("url");
+const Glob = require("glob");
 const _ = require("lodash");
 const { readYAML } = require("./yaml");
 const { getRefType, shouldInclude } = require("./ref");
@@ -28,7 +29,7 @@ class Merger {
 
     // 1st merge: list all components
     this.manager = new ComponentManager();
-    await this.mergeRefs(doc.paths, currentFile, "$.paths");
+    await this.mergeRefs(doc, currentFile, "$");
 
     // resolve component names in case of conflict
     const nameResolver = new ComponentNameResolver(this.manager.components);
@@ -135,7 +136,25 @@ class Merger {
       if (parsedTarget.isHttp) {
         content = await download(parsedTarget.hrefWoHash);
       } else {
-        content = readYAML(parsedTarget.hrefWoHash);
+        // handle glob pattern
+        content = {};
+        let matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
+          Path.relative(Path.dirname(pFile.hrefWoHash), p)
+        );
+        if (matchedFiles.length > 1) {
+          for (let mf of matchedFiles) {
+            let basename = Path.basename(mf, Path.extname(mf));
+            content[basename] = await this.handleInclude(
+              { [key]: mf },
+              key,
+              mf,
+              file,
+              `${jsonPath}.${basename}`
+            );
+          }
+        } else {
+          content = readYAML(parsedTarget.hrefWoHash);
+        }
       }
       nextFile = parsedTarget.hrefWoHash;
     }

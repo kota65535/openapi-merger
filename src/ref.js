@@ -27,7 +27,7 @@ const REF_TYPES = {
   },
   schemas: (path) => {
     return path.match(
-      /(not|allOf|oneOf|anyOf|items|additionalProperties|schema|(properties|discriminator)\.[a-zA-Z0-9\.\-_]+)$/
+      /(items|additionalProperties|schema|(allOf|oneOf|anyOf|examples|properties|discriminator)\.[a-zA-Z0-9\.\-_]+)$/
     );
   },
   pathItems: (path) => {
