@@ -36,6 +36,30 @@ function filterObject(obj, keyPattern) {
   return ret;
 }
 
+function appendObjectKeys(obj, str) {
+  if (!str) {
+    return obj;
+  }
+  let ret = {};
+  for (const [key, val] of Object.entries(obj)) {
+    const newKey = `${str}${key}`;
+    ret[newKey] = val;
+  }
+  return ret;
+}
+
+function prependObjectKeys(obj, str) {
+  if (!str) {
+    return obj;
+  }
+  let ret = {};
+  for (const [key, val] of Object.entries(obj)) {
+    const newKey = `${key}${str}`;
+    ret[newKey] = val;
+  }
+  return ret;
+}
+
 function escapeJsonPointer(str) {
   let out = "";
   for (let i = 0; i < str.length; i++) {
@@ -62,4 +86,6 @@ module.exports = {
   sliceObject,
   parseUrl,
   filterObject,
+  appendObjectKeys,
+  prependObjectKeys,
 };

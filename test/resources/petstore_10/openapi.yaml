@@ -7,7 +7,7 @@ info:
 servers:
   - url: http://petstore.swagger.io/v1
 paths:
-  $include/^\/pets$/: ./paths/_index.yaml
+  $include.pets: ./paths/_index.yaml
 components:
   securitySchemes:
     oAuth2:

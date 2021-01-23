@@ -7,7 +7,7 @@ info:
 servers:
   $include: ./servers.yaml
 paths:
-  $include/^\/pets$/: ./paths/_index.yaml
+  $include.pets: ./paths/_index.yaml
 components:
   $include: ./securitySchemes.yaml
 tags:

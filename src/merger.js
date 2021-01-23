@@ -7,14 +7,21 @@ const _ = require("lodash");
 const { readYAML } = require("./yaml");
 const { getRefType, shouldInclude } = require("./ref");
 const { download } = require("./http");
-const { sliceObject, parseUrl, filterObject } = require("./util");
+const {
+  sliceObject,
+  parseUrl,
+  filterObject,
+  appendObjectKeys,
+  prependObjectKeys,
+} = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
 
 class Merger {
-  static INCLUDE_PATTERN = /^\$include(#.*?)?(\/.*?\/)?$/;
+  static INCLUDE_PATTERN = /^\$include(#\w+?)?(\.\w+?)?$/;
 
-  constructor() {
+  constructor(config) {
     this.manager = new ComponentManager();
+    this.config = config;
   }
 
   // noinspection JSUnusedGlobalSymbols
@@ -112,8 +119,6 @@ class Merger {
     const pRef = parseUrl(val);
     const pFile = parseUrl(file);
 
-    const keyPattern = getKeyPattern(key);
-
     let content, nextFile;
     if (pRef.isHttp) {
       content = await download(pRef.hrefWoHash);
@@ -142,6 +147,7 @@ class Merger {
           Path.relative(Path.dirname(pFile.hrefWoHash), p)
         );
         if (matchedFiles.length > 1) {
+          // include multiple files
           for (let mf of matchedFiles) {
             let basename = Path.basename(mf, Path.extname(mf));
             content[basename] = await this.handleInclude(
@@ -153,6 +159,7 @@ class Merger {
             );
           }
         } else {
+          // include a single file
           content = readYAML(parsedTarget.hrefWoHash);
         }
       }
@@ -174,8 +181,8 @@ class Merger {
       }
     } else {
       // merge object
-      const filtered = filterObject(merged, keyPattern);
-      _.merge(ret, filtered);
+      const processed = processInclude(key, merged, this.config);
+      _.merge(ret, processed);
       delete ret[key];
     }
     return ret;
@@ -202,10 +209,22 @@ class Merger {
   };
 }
 
-function getKeyPattern(key) {
+function processInclude(key, obj, config) {
+  const clazz = getIncludeClass(key);
+  if (!clazz) {
+    return obj;
+  }
+  const clazzConfig = config["include"][clazz];
+  obj = filterObject(obj, clazzConfig["filter"]);
+  obj = appendObjectKeys(obj, clazzConfig["append"]);
+  obj = prependObjectKeys(obj, clazzConfig["prepend"]);
+  return obj;
+}
+
+function getIncludeClass(key) {
   const groups = key.match(Merger.INCLUDE_PATTERN);
   const pattern = groups ? groups[2] : null;
-  return pattern ? pattern.substr(1, pattern.length - 2) : null;
+  return pattern ? pattern.substr(1) : null;
 }
 
 module.exports = Merger;
