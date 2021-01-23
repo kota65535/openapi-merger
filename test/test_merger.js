@@ -7,9 +7,11 @@ const main = require("../src/main");
 const assert = require("chai").assert;
 
 const runMerger = async (name) => {
+  const configFile = path.join("resources", name, "config.yaml");
   const params = {
     input: path.join("resources", name, "openapi.yaml"),
     output: path.join("resources", name, "out.yaml"),
+    config: fs.existsSync(configFile) ? configFile : null,
     debug: true,
   };
   await main(params);

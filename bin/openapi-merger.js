@@ -28,11 +28,13 @@ program
     (val) =>
       validate(val, /^.+\.(yml|yaml)$/gi, 'output file must be "*.(yml|yaml)"')
   )
+  .option("-c, --config", "configuration file", false)
   .option("--debug", "debug mode, such as print error tracks", false)
   .action((args) => {
     const params = {
       input: args.input,
       output: args.output,
+      config: args.config,
       debug: args.debug,
     };
     console.debug("params: ", params);

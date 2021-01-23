@@ -1,0 +1,4 @@
+include:
+  pets:
+    append: "/v1"
+    filter: "pets$"
