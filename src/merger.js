@@ -215,6 +215,12 @@ function processInclude(key, obj, config) {
     return obj;
   }
   const clazzConfig = config["include"][clazz];
+  if (!clazzConfig) {
+    console.warn(
+      `$include classname '${clazz} specified, but no configuration found.`
+    );
+    return obj;
+  }
   obj = filterObject(obj, clazzConfig["filter"]);
   obj = appendObjectKeys(obj, clazzConfig["append"]);
   obj = prependObjectKeys(obj, clazzConfig["prepend"]);
