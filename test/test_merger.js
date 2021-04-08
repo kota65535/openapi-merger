@@ -77,4 +77,8 @@ describe("merger", () => {
   it("$include anywhere", async () => {
     await runMerger("petstore_11");
   });
+
+  it("$include with glob", async () => {
+    await runMerger("petstore_12");
+  });
 });

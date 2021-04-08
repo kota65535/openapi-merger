@@ -143,10 +143,10 @@ class Merger {
       } else {
         // handle glob pattern
         content = {};
-        let matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
-          Path.relative(Path.dirname(pFile.hrefWoHash), p)
-        );
-        if (matchedFiles.length > 1) {
+        if (parsedTarget.hrefWoHash.includes("*")) {
+          let matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
+            Path.relative(Path.dirname(pFile.hrefWoHash), p)
+          );
           // include multiple files
           for (let mf of matchedFiles) {
             let basename = Path.basename(mf, Path.extname(mf));
