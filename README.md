@@ -13,70 +13,61 @@ Yet another CLI tool for merging multiple OpenAPI files into a single file.
 
 ```sh
 $ npm install -g openapi-merger
-$ openapi-merger -i openapi.yaml -o out.yaml
+$ openapi-merger -i openapi.yaml -o merged.yaml
 ```
 
 ## $include keyword
 
-There are some patterns for $include usage.
-- merge object into object
-- merge object into array
-- merge array into array
+openapi-merger introduces the special keyword `$include`.
+It has similar syntax as `$ref`, which takes JSON reference as its value.
 
-### merge object into object
+```
+$include: 'reference to content'
+```
+
+The biggest difference is that `$include` replaces itself directly by the referenced content, allowing to merge its sibling elements.
+
+
+### Merge objects & arrays
+
+If `$include` is used in an object and then referenced content is an object too, they are merged.
+
+- main.yml
+```yaml
+object:
+  $include: object.yml
+  key3: val3
+```
+
 - object.yml
 ```yaml
 key1: val1
 key2: val2
 ```
-- main.yml
-```yaml
-map:
-  $include: ./object.yml
-  key3: val3
-```
+
 - results in:
 ```yaml
-map:
+object:
   key1: val1
   key2: val2
   key3: val3
 ``` 
 
-### merge object into array
-- object.yml
-```yaml
-key1: val1
-key2: val2
-```
+Arrays go in the same manner.
+
 - main.yml
 ```yaml
 array:
-  - $include: ./object.yml
-  - key3: val3
-    key4: val4
+  - $include: array.yml
+  - val3
 ```
-- results in:
-```yaml
-map:
-  - key1: val1
-    key2: val2
-  - key3: val3
-    key4: val4
-``` 
 
-### merge array into array
 - array.yml
 ```yaml
 - val1
 - val2
 ```
-- main.yml
-```yaml
-array:
-  - $include: ./array.yml
-  - val3
-```
+
 - results in:
 ```yaml
 array:
@@ -85,3 +76,88 @@ array:
   - val3
 ``` 
 
+
+### Multiple $include at same place
+
+`$include` can be used multiple times in the same place by appending `#` with some ID, avoiding key duplication.
+
+```
+$include#foo: ./foo.yml
+$include#bar: ./bar.yml
+```
+
+
+### Key modification & Filtering
+
+`$include` is capable of modification and filtering of the keys of the referenced content.
+This is useful when you want to aggregate multiple OpenAPI documents of backend services into one for API Gateway.
+
+To utilize this function, a configuration file should be given by `-c` option.
+The configuration file is like following:
+
+```yaml
+include:
+  # 'foo' class, which add '/v1' prefix to each key
+  foo:
+    prefix: /v1
+  # 'bar' class, which selects only keys matching to regex (here excluding paths that begins 'internal')
+  bar: 
+    filter: ^(?!/internal).*
+```
+
+Use defined class as following:
+- main.yml
+```yaml
+# using foo class
+$include.foo: paths.yml 
+# using bar class
+$include.bar: paths.yml
+```
+
+- paths.yml
+```yaml
+/users:
+  post:
+    ...
+
+/users/{id}:
+  get:
+    ...
+
+/internal/pets:
+  post:
+    ...
+  
+```
+
+- results in:
+```yaml
+# from $include.foo
+/v1/users:
+  post:
+    ...
+
+/v1/users/{id}:
+  get:
+    ...
+
+/v1/internal/pets:
+  post:
+    ...
+
+# from $include.bar
+/users:
+  post:
+    ...
+
+/users/{id}:
+  get:
+    ...
+```
+
+You can still use `#` notation to avoid key conflicts like below. 
+
+```
+$include#a.foo: paths1.yml
+$include#b.foo: paths2.yml
+```

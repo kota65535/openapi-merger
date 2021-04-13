@@ -14,7 +14,7 @@ function validate(val, pattern, message) {
 
 program
   .version(require("../package.json").version)
-  .usage("[-h] [-i file] [-o file] [--debug]")
+  .usage("-i <file> -o <file> [-c <config-file>]")
   .description("merge OpenAPI files into a single file. just support YAML.")
   .requiredOption(
     "-i, --input <*.yml|yaml file>",
@@ -37,7 +37,9 @@ program
       config: args.config,
       debug: args.debug,
     };
-    console.debug("params: ", params);
+    if (params.debug) {
+      console.debug("params: ", params);
+    }
 
     main(params);
   });
