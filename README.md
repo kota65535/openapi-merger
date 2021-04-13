@@ -128,7 +128,6 @@ $include.bar: paths.yml
 /internal/pets:
   post:
     ...
-  
 ```
 
 - results in:
