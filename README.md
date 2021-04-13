@@ -21,7 +21,7 @@ $ openapi-merger -i openapi.yaml -o merged.yaml
 openapi-merger introduces the special keyword `$include`.
 It has similar syntax as `$ref`, which takes JSON reference as its value.
 
-```
+```yaml
 $include: 'reference to content'
 ```
 
@@ -81,7 +81,7 @@ array:
 
 `$include` can be used multiple times in the same place by appending `#` with some ID, avoiding key duplication.
 
-```
+```yaml
 $include#foo: ./foo.yml
 $include#bar: ./bar.yml
 ```
@@ -157,7 +157,7 @@ $include.bar: paths.yml
 
 You can still use `#` notation to avoid key conflicts like below. 
 
-```
+```yaml
 $include#a.foo: paths1.yml
 $include#b.foo: paths2.yml
 ```
