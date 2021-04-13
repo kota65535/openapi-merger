@@ -100,7 +100,8 @@ include:
   # 'foo' class, which add '/v1' prefix to each key
   foo:
     prefix: /v1
-  # 'bar' class, which selects only keys matching to regex (here excluding paths that begins 'internal')
+  # 'bar' class, which selects only keys matching to regex 
+  # here excluding paths that begins 'internal'
   bar: 
     filter: ^(?!/internal).*
 ```
