@@ -222,8 +222,8 @@ function processInclude(key, obj, config) {
     return obj;
   }
   obj = filterObject(obj, clazzConfig["filter"]);
-  obj = appendObjectKeys(obj, clazzConfig["append"]);
-  obj = prependObjectKeys(obj, clazzConfig["prepend"]);
+  obj = appendObjectKeys(obj, clazzConfig["prefix"]);
+  obj = prependObjectKeys(obj, clazzConfig["suffix"]);
   return obj;
 }
 
