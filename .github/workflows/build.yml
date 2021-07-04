@@ -21,4 +21,6 @@ jobs:
           node-version: '14'
           cache: 'yarn'
       - name: Check if connected
-        run: yarn test
+        run: |
+          yarn install
+          yarn test
