@@ -11,7 +11,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runs-on:
+          - ubuntu-latest
+          - windows-latest
+    runs-on: ${{ matrix.runs-on }}
     name: Test
     steps:
       - name: Checkout
@@ -20,7 +25,7 @@ jobs:
         with:
           node-version: '14'
           cache: 'yarn'
-      - name: Check if connected
+      - name: Test
         run: |
           yarn install
           yarn test
