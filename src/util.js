@@ -1,13 +1,14 @@
 "use strict";
 
 const Url = require("url");
+const Path = require("path");
 
 function sliceObject(obj, hash) {
   if (!hash || !hash.startsWith("#")) {
     return obj;
   }
   hash = hash.substr(2);
-  hash.split("/").every((k) => {
+  hash.split(Path.sep).every((k) => {
     k = escapeJsonPointer(k);
     let desc = Object.getOwnPropertyDescriptor(obj, k);
     if (desc) {
