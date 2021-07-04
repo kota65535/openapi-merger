@@ -1,7 +1,6 @@
 "use strict";
 
 const Url = require("url");
-const Path = require("path");
 
 function sliceObject(obj, hash) {
   if (!hash || !hash.startsWith("#")) {
@@ -10,14 +9,7 @@ function sliceObject(obj, hash) {
   hash = hash.substr(2);
   hash.split("/").every((k) => {
     k = escapeJsonPointer(k);
-    let desc = Object.getOwnPropertyDescriptor(obj, k);
-    if (desc) {
-      obj = desc.value;
-    } else {
-      console.error(`sliceObject failed`);
-      console.error(obj);
-      console.error(k);
-    }
+    obj = Object.getOwnPropertyDescriptor(obj, k).value;
     return obj;
   });
   return obj;
