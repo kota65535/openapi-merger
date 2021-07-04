@@ -8,13 +8,15 @@ function sliceObject(obj, hash) {
     return obj;
   }
   hash = hash.substr(2);
-  hash.split(Path.sep).every((k) => {
+  hash.split("/").every((k) => {
     k = escapeJsonPointer(k);
     let desc = Object.getOwnPropertyDescriptor(obj, k);
     if (desc) {
       obj = desc.value;
     } else {
-      console.error(`sliceObject failed: ${obj}, ${k}`);
+      console.error(`sliceObject failed`);
+      console.error(obj);
+      console.error(k);
     }
     return obj;
   });
