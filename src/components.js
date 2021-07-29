@@ -25,9 +25,7 @@ class ComponentManager {
   }
 
   get = (url) => {
-    return this.components.find(
-      (c) => c.url === url || c.getLocalRef() === url
-    );
+    return this.components.find((c) => c.url === url || c.getLocalRef() === url);
   };
 
   create = async (type, url) => {
@@ -86,9 +84,7 @@ class ComponentNameResolver {
     const nameToCmps = {};
     for (const c of components) {
       const { path, hash } = parseUrl(c.url);
-      const name = hash
-        ? Path.basename(hash)
-        : Path.basename(path, Path.extname(path));
+      const name = hash ? Path.basename(hash) : Path.basename(path, Path.extname(path));
       const key = `${name},${c.type}`;
       if (nameToCmps[key]) {
         nameToCmps[key].push(c);

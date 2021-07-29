@@ -47,10 +47,7 @@ class Merger {
     // 2nd merge: merge them all
     this.manager = new ComponentManager(nameResolver);
     doc = await this.mergeRefs(doc, currentFile, "$");
-    doc.components = _.merge(
-      doc.components,
-      this.manager.getComponentsSection()
-    );
+    doc.components = _.merge(doc.components, this.manager.getComponentsSection());
     return doc;
   };
 
@@ -201,13 +198,7 @@ class Merger {
         continue;
       }
       if (mval)
-        await this.handleRef(
-          val.mapping,
-          mkey,
-          mval,
-          file,
-          `${jsonPath}.discriminator.${mkey}`
-        );
+        await this.handleRef(val.mapping, mkey, mval, file, `${jsonPath}.discriminator.${mkey}`);
     }
   };
 }
@@ -219,9 +210,7 @@ function processInclude(key, obj, config) {
   }
   const clazzConfig = config["include"][clazz];
   if (!clazzConfig) {
-    console.warn(
-      `$include classname '${clazz} specified, but no configuration found.`
-    );
+    console.warn(`$include classname '${clazz} specified, but no configuration found.`);
     return obj;
   }
   obj = filterObject(obj, clazzConfig["filter"]);
