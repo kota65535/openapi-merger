@@ -32,7 +32,10 @@ class Merger {
    * @returns merged OpenAPI object
    */
   merge = async (doc, inputFile) => {
-    const currentFile = Path.resolve(process.cwd(), inputFile);
+    let currentFile = Path.resolve(process.cwd(), inputFile);
+    // convert to posix style path.
+    // this path works with fs module like a charm  on both windows and unix.
+    currentFile = parseUrl(currentFile).path;
 
     // 1st merge: list all components
     this.manager = new ComponentManager();
@@ -105,7 +108,7 @@ class Merger {
       if (pFile.isHttp) {
         target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
-        target = Path.join(Path.dirname(pFile.hrefWoHash), val);
+        target = Path.posix.join(Path.posix.dirname(pFile.hrefWoHash), val);
       }
       const parsedTarget = parseUrl(target);
       cmp = await this.manager.getOrCreate(refType, target);
@@ -135,7 +138,7 @@ class Merger {
       if (pFile.isHttp) {
         target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
-        target = Path.join(Path.dirname(pFile.hrefWoHash), val);
+        target = Path.posix.join(Path.posix.dirname(pFile.hrefWoHash), val);
       }
       const parsedTarget = parseUrl(target);
       if (parsedTarget.isHttp) {

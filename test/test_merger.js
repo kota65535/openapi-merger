@@ -15,9 +15,12 @@ const runMerger = async (name) => {
     debug: true,
   };
   await main(params);
+  // ignore carriage return for cross-platform
   assert.equal(
-    "" + fs.readFileSync(params.output),
-    "" + fs.readFileSync(path.join("resources", name, "expected.yaml"))
+    ("" + fs.readFileSync(params.output)).replace(/\r/g, ""),
+    (
+      "" + fs.readFileSync(path.join("resources", name, "expected.yaml"))
+    ).replace(/\r/g, "")
   );
 };
 
