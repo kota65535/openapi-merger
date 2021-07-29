@@ -106,7 +106,7 @@ class Merger {
     } else {
       let target;
       if (pFile.isHttp) {
-        target = Url.resolve(Path.posix.dirname(pFile.hrefWoHash) + "/", val);
+        target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
         target = Path.posix.join(Path.posix.dirname(pFile.hrefWoHash), val);
       }
@@ -138,7 +138,7 @@ class Merger {
       if (pFile.isHttp) {
         target = Url.resolve(Path.dirname(pFile.hrefWoHash) + "/", val);
       } else {
-        target = Path.join(Path.dirname(pFile.hrefWoHash), val);
+        target = Path.posix.join(Path.posix.dirname(pFile.hrefWoHash), val);
       }
       const parsedTarget = parseUrl(target);
       if (parsedTarget.isHttp) {
