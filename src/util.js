@@ -16,10 +16,15 @@ function sliceObject(obj, hash) {
 }
 
 function parseUrl(url) {
+  // this converts to posix path (separated by '/') if windows path (separated by '\') is given
   let ret = Url.parse(url);
   ret.isLocal = !ret.path && ret.hash;
   ret.isHttp = ret.protocol && ret.protocol.match(/^(http|https):/);
   ret.hrefWoHash = ret.href.replace(ret.hash, "");
+  if (ret.hash) {
+    // for windows
+    ret.hash = ret.hash.replace(/%5C/g, "/");
+  }
   return ret;
 }
 
