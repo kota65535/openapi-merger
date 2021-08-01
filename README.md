@@ -2,6 +2,9 @@
 
 Yet another CLI tool for merging multiple OpenAPI files into a single file.
 
+![build workflow](https://github.com/kota65535/openapi-merger/actions/workflows/build.yml/badge.svg)
+[![NPM](https://nodei.co/npm/openapi-merger.png)](https://nodei.co/npm/openapi-merger/)
+
 ## Features
 - Similar to [swagger-merger](https://github.com/WindomZ/swagger-merger)
 - Convert all remote & URL refs into local refs
