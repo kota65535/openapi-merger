@@ -1,0 +1,4 @@
+type: oauth2
+flows:
+  password:
+    tokenUrl: 'https://api.example.com/auth/token'

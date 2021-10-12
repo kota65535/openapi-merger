@@ -24,6 +24,10 @@ class ComponentManager {
     this.nameResolver = nameResolver;
   }
 
+  exists = (url) => {
+    return !!this.get(url);
+  };
+
   get = (url) => {
     return this.components.find((c) => c.url === url || c.getLocalRef() === url);
   };

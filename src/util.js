@@ -7,11 +7,13 @@ function sliceObject(obj, hash) {
     return obj;
   }
   hash = hash.substr(2);
-  hash.split("/").every((k) => {
-    k = escapeJsonPointer(k);
-    obj = Object.getOwnPropertyDescriptor(obj, k).value;
-    return obj;
-  });
+  if (hash) {
+    hash.split("/").every((k) => {
+      k = escapeJsonPointer(k);
+      obj = Object.getOwnPropertyDescriptor(obj, k).value;
+      return obj;
+    });
+  }
   return obj;
 }
 
