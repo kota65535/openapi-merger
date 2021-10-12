@@ -82,4 +82,8 @@ describe("merger", () => {
   it("$include with glob", async () => {
     await runMerger("petstore_12");
   });
+
+  it("recursive", async () => {
+    await runMerger("petstore_13");
+  });
 });

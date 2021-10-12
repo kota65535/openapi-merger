@@ -88,13 +88,16 @@ class Merger {
       return;
     }
 
-    let cmp, nextFile;
+    let cmp,
+      nextFile,
+      cmpExists = false;
     if (pRef.isHttp) {
+      cmpExists = this.manager.exists(pRef.href);
       cmp = await this.manager.getOrCreate(refType, pRef.href);
       nextFile = pRef.hrefWoHash;
     } else if (pRef.isLocal) {
       // avoid infinite loop
-      if (this.manager.get(val)) {
+      if (this.manager.exists(val)) {
         return;
       }
       const href = pFile.hrefWoHash + pRef.hash;
@@ -108,10 +111,14 @@ class Merger {
         target = Path.posix.join(Path.posix.dirname(pFile.hrefWoHash), val);
       }
       const parsedTarget = parseUrl(target);
+      cmpExists = this.manager.exists(target);
       cmp = await this.manager.getOrCreate(refType, target);
       nextFile = parsedTarget.hrefWoHash;
     }
     ret[key] = cmp.getLocalRef();
+    if (file === nextFile && cmpExists) {
+      return;
+    }
     cmp.content = await this.mergeRefs(cmp.content, nextFile, jsonPath);
   };
 
