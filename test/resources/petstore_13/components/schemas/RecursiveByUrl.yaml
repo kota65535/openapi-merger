@@ -6,4 +6,4 @@ properties:
   children:
     type: array
     items:
-      $ref: RecursiveByUrl.yaml
+      $ref: https://raw.githubusercontent.com/kota65535/openapi-merger/main/test/resources/petstore_13/components/schemas/RecursiveByUrl.yaml
