@@ -6,4 +6,4 @@ properties:
   children:
     type: array
     items:
-      $ref: RecursiveByRemote.yaml
+      $ref: RecursiveByUrl.yaml

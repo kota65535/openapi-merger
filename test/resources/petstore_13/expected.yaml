@@ -124,4 +124,4 @@ components:
         children:
           type: array
           items:
-            $ref: '#/components/schemas/RecursiveByRemote'
+            $ref: '#/components/schemas/RecursiveByUrl'
