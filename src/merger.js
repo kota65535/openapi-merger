@@ -88,9 +88,7 @@ class Merger {
       return;
     }
 
-    let cmp,
-      nextFile,
-      cmpExists = false;
+    let cmp, nextFile, cmpExists;
     if (pRef.isHttp) {
       cmpExists = this.manager.exists(pRef.href);
       cmp = await this.manager.getOrCreate(refType, pRef.href);
@@ -117,6 +115,7 @@ class Merger {
       nextFile = parsedTarget.hrefWoHash;
     }
     ret[key] = cmp.getLocalRef();
+    // avoid infinite loop on recursive definition
     if (file === nextFile && cmpExists) {
       return;
     }
