@@ -9,5 +9,4 @@ servers:
 paths: {}
 components:
   schemas:
-    Recursive:
-      $include: components/schemas/Recursive.yaml
+    $include: components/schemas/**/*.yaml

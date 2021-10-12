@@ -100,7 +100,8 @@ class Merger {
       if (this.manager.exists(val)) {
         return;
       }
-      const href = pFile.hrefWoHash + pRef.hash;
+      const href = pFile.hrefWoHash + (pRef.hash === "#/" ? "" : pRef.hash);
+      cmpExists = this.manager.exists(href);
       cmp = await this.manager.getOrCreate(refType, href);
       nextFile = pFile.hrefWoHash;
     } else {
