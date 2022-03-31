@@ -6,7 +6,7 @@ info:
     name: MIT
 servers:
   - url: 'http://petstore.swagger.io/v1'
-paths: {}
+paths: { }
 components:
   schemas:
     Error:
