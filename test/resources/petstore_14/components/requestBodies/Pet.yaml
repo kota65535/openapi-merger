@@ -1,0 +1,5 @@
+description: Pet
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/pet/Pet.yaml

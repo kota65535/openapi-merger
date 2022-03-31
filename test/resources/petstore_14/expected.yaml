@@ -1,0 +1,259 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Swagger Petstore
+  license:
+    name: MIT
+servers:
+  - url: 'http://petstore.swagger.io/v1'
+paths:
+  /pets:
+    get:
+      summary: List all pets
+      operationId: listPets
+      tags:
+        - pets
+        - tag3
+        - tag4
+      parameters:
+        - name: limit
+          in: query
+          description: How many items to return at one time (max 100)
+          required: false
+          schema:
+            type: integer
+            format: int32
+        - name: petId
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+          in: query
+          required: true
+      responses:
+        '200':
+          description: A paged array of pets
+          headers:
+            x-next:
+              description: A link to the next page of responses
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pets'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a pet
+      operationId: createPets
+      tags:
+        - pets
+      requestBody:
+        description: body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update a pet
+      operationId: createPets
+      tags:
+        - pets
+      requestBody:
+        $ref: '#/components/schemas/Pet'
+      responses:
+        '201':
+          description: Null response
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  '/pets/{petId}':
+    get:
+      summary: Info for a specific pet
+      operationId: showPetById
+      tags:
+        - tag1
+        - tag2
+      parameters:
+        - name: petId
+          description: The id of the pet to retrieve
+          schema:
+            type: string
+          in: path
+          required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/Pet'
+        default:
+          $ref: '#/components/responses/Error'
+components:
+  schemas:
+    Foo:
+      $ref: '#/components/schemas/Pets'
+    Cat:
+      description: A representation of a cat
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            huntingSkill:
+              type: string
+              description: The measured skill for hunting
+              default: lazy
+              enum:
+                - clueless
+                - lazy
+                - adventurous
+                - aggressive
+          required:
+            - huntingSkill
+    Dog:
+      description: A representation of a dog
+      allOf:
+        - $ref: '#/components/schemas/Pet'
+        - type: object
+          properties:
+            packSize:
+              type: integer
+              format: int32
+              description: the size of the pack the dog is from
+              default: 0
+              minimum: 0
+          required:
+            - packSize
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+    Pet:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        name:
+          type: string
+        tag:
+          type: string
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          cat: '#/components/schemas/Cat'
+          dog: '#/components/schemas/Dog'
+      required:
+        - id
+        - name
+        - type
+    Pets:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: integer
+            format: int64
+            readOnly: true
+          name:
+            type: string
+          tag:
+            type: string
+          type:
+            type: string
+        discriminator:
+          propertyName: type
+          mapping:
+            cat: '#/components/schemas/Cat'
+            dog: '#/components/schemas/Dog'
+        required:
+          - id
+          - name
+          - type
+  parameters:
+    Foo:
+      $ref: '#/components/parameters/PetId'
+    PetId:
+      name: petId
+      description: The id of the pet to retrieve
+      schema:
+        type: string
+      in: path
+      required: true
+  responses:
+    Foo:
+      $ref: '#/components/responses/Pet'
+    Error:
+      description: unexpected error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Pet:
+      description: Pet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+          examples:
+            success:
+              $ref: '#/components/examples/Pet'
+      headers:
+        X-Rate-Limit:
+          $ref: '#/components/headers/RateLimit'
+  examples:
+    Foo:
+      $ref: '#/components/examples/Pet'
+    Pet:
+      description: Pet example
+      value:
+        id: 1
+        name: dogie
+  requestBodies:
+    Foo:
+      $ref: '#/components/requestBodies/Pet'
+    Pet:
+      description: Pet
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Pet'
+  headers:
+    Foo:
+      $ref: '#/components/headers/RateLimit'
+    RateLimit:
+      description: Rate Limit
+      schema:
+        type: integer
+  securitySchemes:
+    Foo:
+      $ref: '#/components/securitySchemes/oAuth2'
+    oAuth2:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: 'https://api.example.com/auth/token'
