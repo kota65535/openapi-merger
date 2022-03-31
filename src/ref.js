@@ -17,17 +17,17 @@ const REF_TYPES = {
     return path.match(/headers$/);
   },
   securitySchemes: (path) => {
-    return path.match(/securitySchemes\.[a-zA-Z0-9.-_]+$/);
+    return path.match(/securitySchemes\.([a-zA-Z0-9\.\-_]|[^\x01-\x7E\uFF61-\uFF9F])+$/);
   },
   links: (path) => {
     return path.match(/links$/);
   },
   callbacks: (path) => {
-    return path.match(/callbacks\.[a-zA-Z0-9.-_]+$/);
+    return path.match(/callbacks\.([a-zA-Z0-9\.\-_]|[^\x01-\x7E\uFF61-\uFF9F])+$/);
   },
   schemas: (path) => {
     return path.match(
-      /(items|additionalProperties|schema|(allOf|oneOf|anyOf|examples|properties|discriminator)\.[a-zA-Z0-9\.\-_]+)$/
+      /(items|additionalProperties|schema|(allOf|oneOf|anyOf|examples|properties|discriminator)\.([a-zA-Z0-9\.\-_]|[^\x01-\x7E\uFF61-\uFF9F])+)$/
     );
   },
   pathItems: (path) => {
