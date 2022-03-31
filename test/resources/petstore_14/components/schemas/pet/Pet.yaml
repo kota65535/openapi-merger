@@ -13,8 +13,8 @@ properties:
 discriminator:
   propertyName: type
   mapping:
-    cat: Cat.yaml
-    dog: Dog.yaml
+    猫: Cat.yaml
+    犬: Dog.yaml
 required:
   - id
   - name

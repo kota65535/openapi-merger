@@ -1,0 +1,8 @@
+properties:
+  things:
+    type: object
+    properties:
+      foo:
+        type: integer
+      bar:
+        type: integer

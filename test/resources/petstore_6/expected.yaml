@@ -95,6 +95,8 @@ components:
         password:
           tokenUrl: 'https://api.example.com/auth/token'
   schemas:
+    ExtendedObject:
+      $ref: '#/components/schemas/Extended'
     Cat:
       description: A representation of a cat
       allOf:
@@ -137,6 +139,21 @@ components:
           format: int32
         message:
           type: string
+    Extended:
+      properties:
+        things:
+          type: object
+          properties:
+            foo:
+              type: integer
+            bar:
+              type: integer
+            baz:
+              type: string
+            boo:
+              type: string
+      description: ...
+      type: object
     Pet:
       type: object
       properties:

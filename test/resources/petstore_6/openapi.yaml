@@ -15,3 +15,6 @@ components:
       flows:
         password:
           tokenUrl: 'https://api.example.com/auth/token'
+  schemas:
+    ExtendedObject:
+      $ref: components/schemas/Extended.yaml

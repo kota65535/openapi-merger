@@ -1,6 +1,8 @@
 "use strict";
 
 const Url = require("url");
+const _ = require("lodash");
+const deepmerge = require("deepmerge");
 
 function sliceObject(obj, hash) {
   if (!hash || !hash.startsWith("#")) {
@@ -89,10 +91,19 @@ function escapeJsonPointer(str) {
   return out;
 }
 
+function mergeOrOverwrite(v1, v2) {
+  if (_.isObject(v1) && _.isObject(v2)) {
+    return deepmerge(v1, v2);
+  } else {
+    return v2;
+  }
+}
+
 module.exports = {
   sliceObject,
   parseUrl,
   filterObject,
   appendObjectKeys,
   prependObjectKeys,
+  mergeOrOverwrite,
 };
