@@ -86,4 +86,8 @@ describe("merger", () => {
   it("recursive", async () => {
     await runMerger("petstore_13");
   });
+
+  it("ref type inference", async () => {
+    await runMerger("petstore_14");
+  });
 });

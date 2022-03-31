@@ -1,0 +1,22 @@
+type: object
+properties:
+  id:
+    type: integer
+    format: int64
+    readOnly: true
+  name:
+    type: string
+  tag:
+    type: string
+  type:
+    type: string
+discriminator:
+  propertyName: type
+  mapping:
+    cat: Cat.yaml
+    dog: Dog.yaml
+required:
+  - id
+  - name
+  - type
+

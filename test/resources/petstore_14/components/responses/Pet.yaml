@@ -1,0 +1,11 @@
+description: Pet
+content:
+  application/json:
+    schema:
+      $ref: ../schemas/pet/Pet.yaml
+    examples:
+      success:
+        $ref: ../examples/Pet.yaml
+headers:
+  X-Rate-Limit:
+    $ref: ../headers/RateLimit.yaml
