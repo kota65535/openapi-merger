@@ -13,6 +13,7 @@ const {
   filterObject,
   appendObjectKeys,
   prependObjectKeys,
+  mergeOrOverwrite,
 } = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
 
@@ -57,7 +58,6 @@ class Merger {
     }
     let ret = _.isArray(obj) ? [] : {};
     for (const [key, val] of Object.entries(obj)) {
-      ret[key] = val;
       if (key === "$ref") {
         await this.handleRef(ret, key, val, file, jsonPath);
       } else if (key.match(Merger.INCLUDE_PATTERN)) {
@@ -66,12 +66,10 @@ class Merger {
         await this.handleDiscriminator(ret, key, val, file, jsonPath);
       } else {
         const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`);
-        if (_.isArray(ret) && _.isArray(merged)) {
-          // merge array
-          ret.splice(Number(key), 1);
-          ret = ret.concat(merged);
+        if (_.isArray(merged) && _.isArray(ret)) {
+          ret = mergeOrOverwrite(ret, merged);
         } else {
-          ret[key] = merged;
+          ret[key] = mergeOrOverwrite(ret[key], merged);
         }
       }
     }
@@ -79,6 +77,8 @@ class Merger {
   };
 
   handleRef = async (ret, key, val, file, jsonPath) => {
+    ret[key] = mergeOrOverwrite(ret[key], val);
+
     const pRef = parseUrl(val);
     const pFile = parseUrl(file);
 
@@ -123,6 +123,8 @@ class Merger {
   };
 
   handleInclude = async (ret, key, val, file, jsonPath) => {
+    ret[key] = mergeOrOverwrite(ret[key], val);
+
     const pRef = parseUrl(val);
     const pFile = parseUrl(file);
 
@@ -196,6 +198,8 @@ class Merger {
   };
 
   handleDiscriminator = async (ret, key, val, file, jsonPath) => {
+    ret[key] = mergeOrOverwrite(ret[key], val);
+
     if (!val.mapping) {
       return;
     }

@@ -1,0 +1,10 @@
+$include: "./Common.yaml"
+description: ...
+type: object
+properties:
+  things:
+    properties:
+      baz:
+        type: string
+      boo:
+        type: string
