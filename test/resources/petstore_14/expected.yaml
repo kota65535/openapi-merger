@@ -164,8 +164,8 @@ components:
       discriminator:
         propertyName: type
         mapping:
-          cat: '#/components/schemas/Cat'
-          dog: '#/components/schemas/Dog'
+          猫: '#/components/schemas/Cat'
+          犬: '#/components/schemas/Dog'
       required:
         - id
         - name
@@ -188,8 +188,8 @@ components:
         discriminator:
           propertyName: type
           mapping:
-            cat: '#/components/schemas/Cat'
-            dog: '#/components/schemas/Dog'
+            猫: '#/components/schemas/Cat'
+            犬: '#/components/schemas/Dog'
         required:
           - id
           - name
