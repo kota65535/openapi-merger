@@ -79,6 +79,28 @@ array:
   - val3
 ``` 
 
+If you want not to merge arrays, use `$include` in a nested array.
+
+- main.yml
+```yaml
+array:
+  - - $include: array.yml
+  - val3
+```
+
+- array.yml
+```yaml
+- val1
+- val2
+```
+
+- results in:
+```yaml
+array:
+  - - val1
+    - val2
+  - val3
+``` 
 
 ### Multiple $include at same place
 
