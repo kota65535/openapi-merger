@@ -1,0 +1,18 @@
+title: NestedArray
+description: ...
+type: object
+properties:
+  array:
+    type: array
+    items:
+      type: array
+      items:
+        type: integer
+example:
+  array:
+    - - 1
+      - 2
+      - 3
+    - - 10
+      - 20
+      - 30
