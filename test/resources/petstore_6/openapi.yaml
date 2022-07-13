@@ -18,3 +18,5 @@ components:
   schemas:
     ExtendedObject:
       $ref: components/schemas/Extended.yaml
+    NestedArrayObject:
+      $ref: components/schemas/NestedArray.yaml

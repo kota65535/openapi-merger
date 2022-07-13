@@ -99,6 +99,9 @@ function mergeOrOverwrite(v1, v2) {
   }
 }
 
+// Special class to distinguish $include-ed array and normal one
+class IncludedArray extends Array {}
+
 module.exports = {
   sliceObject,
   parseUrl,
@@ -106,4 +109,5 @@ module.exports = {
   appendObjectKeys,
   prependObjectKeys,
   mergeOrOverwrite,
+  IncludedArray,
 };

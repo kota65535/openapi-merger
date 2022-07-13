@@ -14,6 +14,7 @@ const {
   appendObjectKeys,
   prependObjectKeys,
   mergeOrOverwrite,
+  IncludedArray,
 } = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
 
@@ -66,7 +67,7 @@ class Merger {
         await this.handleDiscriminator(ret, key, val, file, jsonPath);
       } else {
         const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`);
-        if (_.isArray(merged) && _.isArray(ret)) {
+        if (merged instanceof IncludedArray && _.isArray(ret)) {
           ret = mergeOrOverwrite(ret, merged);
         } else {
           ret[key] = mergeOrOverwrite(ret[key], merged);
@@ -182,7 +183,7 @@ class Merger {
         ret = ret.concat(merged);
       } else if (Object.keys(ret).length === 1) {
         // object having one and only $include key, turn into array.
-        ret = merged;
+        ret = IncludedArray.from(merged);
       } else {
         throw new Error(
           `cannot merge array content object. $include: ${val} at jsonPath=${jsonPath}`

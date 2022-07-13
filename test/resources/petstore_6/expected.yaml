@@ -97,6 +97,8 @@ components:
   schemas:
     ExtendedObject:
       $ref: '#/components/schemas/Extended'
+    NestedArrayObject:
+      $ref: '#/components/schemas/NestedArray'
     Cat:
       description: A representation of a cat
       allOf:
@@ -154,6 +156,25 @@ components:
               type: string
       description: ...
       type: object
+    NestedArray:
+      title: NestedArray
+      description: ...
+      type: object
+      properties:
+        array:
+          type: array
+          items:
+            type: array
+            items:
+              type: integer
+      example:
+        array:
+          - - 1
+            - 2
+            - 3
+          - - 10
+            - 20
+            - 30
     Pet:
       type: object
       properties:
