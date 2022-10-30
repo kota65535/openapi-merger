@@ -28,7 +28,7 @@
   "author": "kota65535 <kota65535@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "commander": "^5.1.0",
+    "commander": "^9.0.0",
     "deepmerge": "^4.2.2",
     "fs-extra": "^9.0.1",
     "glob": "^7.1.6",
