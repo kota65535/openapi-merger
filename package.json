@@ -21,7 +21,7 @@
   "author": "kota65535 <kota65535@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "commander": "5.1.0",
+    "commander": "10.0.0",
     "deepmerge": "4.2.2",
     "glob": "7.1.6",
     "js-yaml": "4.1.0",
