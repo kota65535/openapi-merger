@@ -23,7 +23,6 @@
   "dependencies": {
     "commander": "5.1.0",
     "deepmerge": "4.2.2",
-    "fs-extra": "9.0.1",
     "glob": "7.1.6",
     "js-yaml": "3.14.0",
     "lodash": "4.17.21",
@@ -35,6 +34,7 @@
     "eslint": "8.31.0",
     "eslint-config-prettier": "8.6.0",
     "eslint-config-standard": "17.0.0",
+    "fs-extra": "11.1.0",
     "husky": "8.0.3",
     "mocha": "8.0.1",
     "nyc": "15.1.0",
