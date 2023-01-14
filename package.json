@@ -7,6 +7,7 @@
   },
   "scripts": {
     "test": "cd test && nyc --reporter=html mocha *.js",
+    "lint": "eslint --fix src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js"
   },
   "husky": {

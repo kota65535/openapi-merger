@@ -24,7 +24,7 @@ const runMerger = async (name) => {
 
 describe("merger", () => {
   before(async () => {
-    let promises = [];
+    const promises = [];
     for (const f of glob.sync("**/out.yaml")) {
       promises.push(fs.remove(f));
     }

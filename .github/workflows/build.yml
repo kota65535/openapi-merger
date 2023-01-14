@@ -20,12 +20,12 @@ jobs:
     name: Test
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+        uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '14'
-          cache: 'yarn'
+          node-version: 18
+          cache: npm
       - name: Test
         run: |
-          yarn install
-          yarn test
+          npm install
+          npm run test
