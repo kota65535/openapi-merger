@@ -14,12 +14,12 @@ function readYAML(filePath) {
 }
 
 function writeYAML(doc, filePath) {
-  const outputDir = path.dirname(filePath);
-  if (!fs.existsSync(outputDir)) {
-    fs.mkdirSync(outputDir, { recursive: true });
-  }
   const dump = yaml.dump(doc, { lineWidth: 1000 });
   if (filePath) {
+    const outputDir = path.dirname(filePath);
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+    }
     fs.writeFileSync(filePath, dump);
   } else {
     console.log(dump);
