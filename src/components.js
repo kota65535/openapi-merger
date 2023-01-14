@@ -106,9 +106,7 @@ class ComponentNameResolver {
         for (let i = 0; i < cmps.length; i++) {
           const resolved = `${name}${i + 1}`;
           cToName[cmps[i].url] = resolved;
-          console.warn(
-            `conflicted component name "${name}" resolved to "${resolved}". url=${cmps[i].url}`
-          );
+          console.warn(`conflicted component name "${name}" resolved to "${resolved}". url=${cmps[i].url}`);
         }
       }
     }

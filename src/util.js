@@ -21,7 +21,7 @@ function sliceObject(obj, hash) {
 
 function parseUrl(url) {
   // this converts to posix path (separated by '/') if windows path (separated by '\') is given
-  let ret = Url.parse(url);
+  const ret = Url.parse(url);
   ret.isLocal = !ret.path && ret.hash;
   ret.isHttp = ret.protocol && ret.protocol.match(/^(http|https):/);
   ret.hrefWoHash = ret.href.replace(ret.hash, "");
@@ -36,7 +36,7 @@ function filterObject(obj, keyPattern) {
   if (!keyPattern) {
     return obj;
   }
-  let ret = {};
+  const ret = {};
   for (const [key, val] of Object.entries(obj)) {
     if (key.match(keyPattern)) {
       ret[key] = val;
@@ -49,7 +49,7 @@ function appendObjectKeys(obj, str) {
   if (!str) {
     return obj;
   }
-  let ret = {};
+  const ret = {};
   for (const [key, val] of Object.entries(obj)) {
     const newKey = `${str}${key}`;
     ret[newKey] = val;
@@ -61,7 +61,7 @@ function prependObjectKeys(obj, str) {
   if (!str) {
     return obj;
   }
-  let ret = {};
+  const ret = {};
   for (const [key, val] of Object.entries(obj)) {
     const newKey = `${key}${str}`;
     ret[newKey] = val;
