@@ -14,19 +14,13 @@ function validate(val, pattern, message) {
 
 program
   .version(require("../package.json").version)
-  .usage("-i <file> -o <file> [-c <config-file>]")
+  .usage("-i <file> [-o <file>] [-c <config-file>]")
   .description("merge OpenAPI files into a single file. just support YAML.")
-  .requiredOption(
-    "-i, --input <*.yml|yaml file>",
-    "input a main/entry YAML OpenAPI file",
-    (val) =>
-      validate(val, /^.+\.(yml|yaml)$/gi, 'input file must be "*.(yml|yaml)"')
+  .requiredOption("-i, --input <*.yml|yaml file>", "input a main/entry YAML OpenAPI file", (val) =>
+    validate(val, /^.+\.(yml|yaml)$/gi, 'input file must be "*.(yml|yaml)"')
   )
-  .requiredOption(
-    "-o, --output <*.yml|yaml file>",
-    "output OpenAPI file",
-    (val) =>
-      validate(val, /^.+\.(yml|yaml)$/gi, 'output file must be "*.(yml|yaml)"')
+  .option("-o, --output <*.yml|yaml file>", "output OpenAPI file", (val) =>
+    validate(val, /^.+\.(yml|yaml)$/gi, 'output file must be "*.(yml|yaml)"')
   )
   .option("-c, --config <*.yml|yaml file>", "configuration file")
   .option("--debug", "debug mode, such as print error tracks", false)

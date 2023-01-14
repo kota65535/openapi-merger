@@ -19,7 +19,11 @@ function writeYAML(doc, filePath) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
   const dump = yaml.dump(doc, { lineWidth: 1000 });
-  fs.writeFileSync(filePath, dump);
+  if (filePath) {
+    fs.writeFileSync(filePath, dump);
+  } else {
+    console.log(dump);
+  }
 }
 
 module.exports = {
