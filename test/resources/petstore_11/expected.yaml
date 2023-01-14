@@ -5,7 +5,7 @@ info:
   license:
     name: MIT
 servers:
-  - url: 'http://petstore.swagger.io/v1'
+  - url: http://petstore.swagger.io/v1
 paths:
   /v1/pets:
     get:
@@ -66,7 +66,7 @@ components:
       type: oauth2
       flows:
         password:
-          tokenUrl: 'https://api.example.com/auth/token'
+          tokenUrl: https://api.example.com/auth/token
   schemas:
     Cat:
       description: A representation of a cat
