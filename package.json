@@ -6,6 +6,7 @@
     "openapi-merger": "bin/openapi-merger.js"
   },
   "scripts": {
+    "prepare": "husky install",
     "test": "cd test && nyc --reporter=html mocha *.js",
     "lint": "eslint --fix src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js"
@@ -40,7 +41,10 @@
   },
   "devDependencies": {
     "chai": "4.2.0",
-    "husky": "4.2.5",
+    "eslint": "8.31.0",
+    "eslint-config-prettier": "8.6.0",
+    "eslint-config-standard": "17.0.0",
+    "husky": "8.0.3",
     "lint-staged": "10.2.11",
     "mocha": "8.0.1",
     "nyc": "15.1.0",
