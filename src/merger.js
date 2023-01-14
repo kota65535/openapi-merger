@@ -154,19 +154,13 @@ class Merger {
         // handle glob pattern
         content = {};
         if (parsedTarget.hrefWoHash.includes("*")) {
-          let matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
+          const matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
             Path.relative(Path.dirname(pFile.hrefWoHash), p)
           );
           // include multiple files
-          for (let mf of matchedFiles) {
-            let basename = Path.basename(mf, Path.extname(mf));
-            content[basename] = await this.handleInclude(
-              { [key]: mf },
-              key,
-              mf,
-              file,
-              `${jsonPath}.${basename}`
-            );
+          for (const mf of matchedFiles) {
+            const basename = Path.basename(mf, Path.extname(mf));
+            content[basename] = await this.handleInclude({ [key]: mf }, key, mf, file, `${jsonPath}.${basename}`);
           }
         } else {
           // include a single file
@@ -185,9 +179,7 @@ class Merger {
         // object having one and only $include key, turn into array.
         ret = IncludedArray.from(merged);
       } else {
-        throw new Error(
-          `cannot merge array content object. $include: ${val} at jsonPath=${jsonPath}`
-        );
+        throw new Error(`cannot merge array content object. $include: ${val} at jsonPath=${jsonPath}`);
       }
     } else {
       // merge object
@@ -209,8 +201,7 @@ class Merger {
       if (parsedRef.isLocal && this.manager.get(mval)) {
         continue;
       }
-      if (mval)
-        await this.handleRef(val.mapping, mkey, mval, file, `${jsonPath}.discriminator.${mkey}`);
+      if (mval) await this.handleRef(val.mapping, mkey, mval, file, `${jsonPath}.discriminator.${mkey}`);
     }
   };
 }
@@ -220,14 +211,14 @@ function processInclude(key, obj, config) {
   if (!clazz) {
     return obj;
   }
-  const clazzConfig = config["include"][clazz];
+  const clazzConfig = config.include[clazz];
   if (!clazzConfig) {
     console.warn(`$include classname '${clazz} specified, but no configuration found.`);
     return obj;
   }
-  obj = filterObject(obj, clazzConfig["filter"]);
-  obj = appendObjectKeys(obj, clazzConfig["prefix"]);
-  obj = prependObjectKeys(obj, clazzConfig["suffix"]);
+  obj = filterObject(obj, clazzConfig.filter);
+  obj = appendObjectKeys(obj, clazzConfig.prefix);
+  obj = prependObjectKeys(obj, clazzConfig.suffix);
   return obj;
 }
 
