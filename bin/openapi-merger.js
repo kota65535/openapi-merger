@@ -24,7 +24,7 @@ program
   )
   .option("-c, --config <*.yml|yaml file>", "configuration file")
   .option("--debug", "debug mode, such as print error tracks", false)
-  .action((args) => {
+  .action(async (args) => {
     const params = {
       input: args.input,
       output: args.output,
@@ -35,7 +35,17 @@ program
       console.debug("params: ", params);
     }
 
-    main(params);
+    try {
+      await main(params);
+    } catch (e) {
+      // show error message
+      if (params.debug) {
+        console.error(e);
+      } else {
+        console.error("Error :" + e.message);
+      }
+      process.exit(1);
+    }
   });
 
 program.parse(process.argv);
