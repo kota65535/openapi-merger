@@ -90,4 +90,12 @@ describe("merger", () => {
   it("ref type inference", async () => {
     await runMerger("petstore_14");
   });
+
+  it("discriminator mapping with file ref", async () => {
+    await runMerger("petstore_15");
+  });
+
+  // it("discriminator mapping with component ref", async () => {
+  //   await runMerger("petstore_16");
+  // });
 });

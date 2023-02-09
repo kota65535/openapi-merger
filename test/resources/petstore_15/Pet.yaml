@@ -1,0 +1,11 @@
+type: object
+properties:
+  type:
+    type: string
+discriminator:
+  propertyName: type
+  mapping:
+    cat: Cat.yaml
+    dog: Dog.yaml
+required:
+  - type

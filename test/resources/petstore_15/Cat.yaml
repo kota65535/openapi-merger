@@ -1,0 +1,6 @@
+allOf:
+  - $ref: Pet.yaml
+  - type: object
+    properties:
+      huntingSkill:
+        type: string
