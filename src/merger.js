@@ -55,10 +55,10 @@ class Merger {
 
   /**
    * Merge refs of $ref, $include and discriminator mappings recursively.
-   * @param obj target object
+   * @param obj target object or array
    * @param file name of the file containing the target object
    * @param jsonPath JSON path for accessing the target object
-   * @returns {Promise<*[]|*>} merged object
+   * @returns {Promise<*[]|*>} merged object or array
    */
   mergeRefs = async (obj, file, jsonPath) => {
     if (!_.isObject(obj)) {
@@ -73,9 +73,9 @@ class Merger {
       } else if (key === "discriminator") {
         await this.handleDiscriminator(ret, key, val, file, jsonPath);
       } else {
-        // Go recursively
+        // go recursively
         const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`);
-        // Merge arrays or objects according their type
+        // merge arrays or objects according their type
         if (merged instanceof IncludedArray && _.isArray(ret)) {
           ret = mergeOrOverwrite(ret, merged);
         } else {
@@ -86,6 +86,14 @@ class Merger {
     return ret;
   };
 
+  /**
+   * Convert a remote/URL reference into local ones.
+   * @param obj object with a reference
+   * @param key key of the reference
+   * @param val value of the reference
+   * @param file name of the file containing the target object
+   * @param jsonPath JSON path for accessing the target object
+   */
   handleRef = async (ret, key, val, file, jsonPath) => {
     ret[key] = mergeOrOverwrite(ret[key], val);
 
@@ -132,6 +140,15 @@ class Merger {
     cmp.content = await this.mergeRefs(cmp.content, nextFile, jsonPath);
   };
 
+  /**
+   * Convert an inclusion into its contents.
+   * @param obj object with an inclusion
+   * @param key key of the inclusion
+   * @param val value of the inclusion
+   * @param file name of the file containing the target object
+   * @param jsonPath JSON path for accessing the target object
+   * @returns {Promise<*>} result object or array
+   */
   handleInclude = async (ret, key, val, file, jsonPath) => {
     ret[key] = mergeOrOverwrite(ret[key], val);
 
