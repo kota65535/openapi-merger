@@ -5,16 +5,22 @@ const _ = require("lodash");
 const deepmerge = require("deepmerge");
 
 function sliceObject(obj, hash) {
-  if (!hash || !hash.startsWith("#")) {
+  if (!hash) {
     return obj;
   }
-  hash = hash.substr(2);
-  if (hash) {
-    hash.split("/").every((k) => {
+  const path = hash.substr(2);
+  try {
+    path.split("/").every((k) => {
       k = escapeJsonPointer(k);
-      obj = Object.getOwnPropertyDescriptor(obj, k).value;
+      const desc = Object.getOwnPropertyDescriptor(obj, k);
+      if (!desc.value) {
+        throw new Error(`cannot get key ${k} from ${obj}`);
+      }
+      obj = desc.value;
       return obj;
     });
+  } catch (e) {
+    throw new Error(`invalid hash '${hash}'`);
   }
   return obj;
 }
