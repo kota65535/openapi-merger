@@ -35,23 +35,23 @@ describe("merger", () => {
     await runMerger("petstore");
   });
 
-  it("with hash", async () => {
+  it("hash", async () => {
     await runMerger("petstore_1");
   });
 
-  it("with paths dir", async () => {
+  it("paths dir", async () => {
     await runMerger("petstore_2");
   });
 
-  it("with discriminator", async () => {
+  it("discriminator", async () => {
     await runMerger("petstore_3");
   });
 
-  it("with discriminator & hash", async () => {
+  it("discriminator & hash", async () => {
     await runMerger("petstore_4");
   });
 
-  it("with schema name conflict", async () => {
+  it("schema name conflict", async () => {
     await runMerger("petstore_5");
   });
 
@@ -59,19 +59,19 @@ describe("merger", () => {
     await runMerger("petstore_6");
   });
 
-  it("with http ref", async () => {
+  it("http ref", async () => {
     await runMerger("petstore_7");
   });
 
-  it("with http ref & hash", async () => {
+  it("http ref & hash", async () => {
     await runMerger("petstore_8");
   });
 
-  it("with $include http ref", async () => {
+  it("$include http ref", async () => {
     await runMerger("petstore_9");
   });
 
-  it("with $include with key pattern", async () => {
+  it("$include with key pattern", async () => {
     await runMerger("petstore_10");
   });
 
@@ -91,11 +91,7 @@ describe("merger", () => {
     await runMerger("petstore_14");
   });
 
-  it("discriminator mapping with file ref", async () => {
+  it("discriminator with local ref", async () => {
     await runMerger("petstore_15");
   });
-
-  // it("discriminator mapping with component ref", async () => {
-  //   await runMerger("petstore_16");
-  // });
 });

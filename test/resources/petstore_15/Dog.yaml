@@ -1,6 +1,0 @@
-allOf:
-  - $ref: Pet.yaml
-  - type: object
-    properties:
-      packSize:
-        type: integer
