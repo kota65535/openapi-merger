@@ -28,15 +28,15 @@ class Merger {
 
   // noinspection JSUnusedGlobalSymbols
   /**
-   * merge OpenAPI document.
-   * @param doc {object} OpenAPI object
+   * Merge OpenAPI document into the single file.
+   * @param doc {object} OpenAPI document object
    * @param inputFile {string} directory where the doc is located
    * @returns merged OpenAPI object
    */
   merge = async (doc, inputFile) => {
     let currentFile = Path.resolve(process.cwd(), inputFile);
     // convert to posix style path.
-    // this path works with fs module like a charm  on both windows and unix.
+    // this path works with fs module like a charm on both windows and unix.
     currentFile = parseUrl(currentFile).path;
 
     // 1st merge: list all components
@@ -53,6 +53,13 @@ class Merger {
     return doc;
   };
 
+  /**
+   * Merge refs of $ref, $include and discriminator mappings recursively.
+   * @param obj target object
+   * @param file name of the file containing the target object
+   * @param jsonPath JSON path for accessing the target object
+   * @returns {Promise<*[]|*>} merged object
+   */
   mergeRefs = async (obj, file, jsonPath) => {
     if (!_.isObject(obj)) {
       return obj;
@@ -66,7 +73,9 @@ class Merger {
       } else if (key === "discriminator") {
         await this.handleDiscriminator(ret, key, val, file, jsonPath);
       } else {
+        // Go recursively
         const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`);
+        // Merge arrays or objects according their type
         if (merged instanceof IncludedArray && _.isArray(ret)) {
           ret = mergeOrOverwrite(ret, merged);
         } else {
