@@ -4,6 +4,7 @@ const Path = require("path");
 const { readYAML } = require("./yaml");
 const { download } = require("./http");
 const { sliceObject, parseUrl } = require("./util");
+const log = require("loglevel");
 
 class Component {
   constructor(type, name, content, url) {
@@ -106,7 +107,7 @@ class ComponentNameResolver {
         for (let i = 0; i < cmps.length; i++) {
           const resolved = `${name}${i + 1}`;
           cToName[cmps[i].url] = resolved;
-          console.warn(`conflicted component name "${name}" resolved to "${resolved}". url=${cmps[i].url}`);
+          log.warn(`conflicted component name "${name}" resolved to "${resolved}". url=${cmps[i].url}`);
         }
       }
     }

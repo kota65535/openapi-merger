@@ -4,7 +4,10 @@ const fs = require("fs-extra");
 const path = require("path");
 const glob = require("glob");
 const main = require("../src/main");
+const log = require("loglevel");
 const assert = require("chai").assert;
+
+log.setLevel("debug");
 
 const runMerger = async (name) => {
   const configFile = path.join("resources", name, "config.yaml");

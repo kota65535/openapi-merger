@@ -3,12 +3,15 @@
 
 const program = require("commander");
 const main = require("../src/main");
+const log = require("loglevel");
+
+log.setLevel("info");
 
 function validate(val, pattern, message) {
   if (val.match(pattern)) {
     return val;
   }
-  console.error("error: " + message);
+  log.error("error: " + message);
   process.exit(1);
 }
 
@@ -32,7 +35,8 @@ program
       debug: args.debug,
     };
     if (params.debug) {
-      console.debug("params: ", params);
+      log.setLevel("debug");
+      log.debug("params: ", params);
     }
 
     try {
@@ -40,9 +44,9 @@ program
     } catch (e) {
       // show error message
       if (params.debug) {
-        console.error(e);
+        log.error(e);
       } else {
-        console.error("Error :" + e.message);
+        log.error("Error :" + e.message);
       }
       process.exit(1);
     }

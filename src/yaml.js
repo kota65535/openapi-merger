@@ -3,6 +3,7 @@
 const path = require("path");
 const fs = require("fs");
 const yaml = require("js-yaml");
+const log = require("loglevel");
 
 function loadYAML(str) {
   return yaml.load(str);
@@ -22,7 +23,7 @@ function writeYAML(doc, filePath) {
     }
     fs.writeFileSync(filePath, dump);
   } else {
-    console.log(dump);
+    log.info(dump);
   }
 }
 
