@@ -1,6 +1,7 @@
+const log = require("loglevel");
+
 // cf. https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v3.0/schema.json
 //     https://github.com/OAI/OpenAPI-Specification/tree/master/versions
-
 const FIELD_PATTERN = "([a-zA-Z0-9\\-_]|[^\x01-\x7E\uFF61-\uFF9F])+";
 const MAX_JSON_PATH_DEPTH = 100;
 
@@ -69,7 +70,7 @@ function getRefType(path) {
       return k;
     }
   }
-  console.warn(`could not infer $ref type at "${path}". fallback to include.`);
+  log.warn(`could not infer $ref type at "${path}". fallback to include.`);
   if (path.split(".").length > MAX_JSON_PATH_DEPTH) {
     throw new Error(`JSON path depth exceeds ${MAX_JSON_PATH_DEPTH}, aborting...`);
   }

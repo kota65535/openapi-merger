@@ -26,6 +26,7 @@
     "glob": "8.1.0",
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
+    "loglevel": "1.8.1",
     "mktemp": "1.0.0",
     "node-fetch": "2.6.9"
   },

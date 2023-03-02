@@ -17,6 +17,7 @@ const {
   IncludedArray,
 } = require("./util");
 const { ComponentManager, ComponentNameResolver } = require("./components");
+const log = require("loglevel");
 
 class Merger {
   static INCLUDE_PATTERN = /^\$include(#\w+?)?(\.\w+?)?$/;
@@ -98,7 +99,7 @@ class Merger {
    * @param jsonPath a JSON path for accessing the target object
    */
   handleRef = async (obj, key, val, file, jsonPath) => {
-    console.debug(`ref    : ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
+    log.debug(`ref    : ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
 
     obj[key] = mergeOrOverwrite(obj[key], val);
 
@@ -161,7 +162,7 @@ class Merger {
    * @returns {Promise<*>} a result object or array
    */
   handleInclude = async (obj, key, val, file, jsonPath) => {
-    console.debug(`include: ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
+    log.debug(`include: ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
 
     obj[key] = mergeOrOverwrite(obj[key], val);
 
@@ -240,7 +241,7 @@ function processInclude(key, obj, config) {
   }
   const clazzConfig = config.include[clazz];
   if (!clazzConfig) {
-    console.warn(`$include classname '${clazz} specified, but no configuration found.`);
+    log.warn(`$include classname '${clazz} specified, but no configuration found.`);
     return obj;
   }
   obj = filterObject(obj, clazzConfig.filter);
