@@ -22,7 +22,6 @@ class Merger {
   static INCLUDE_PATTERN = /^\$include(#\w+?)?(\.\w+?)?$/;
 
   constructor(config) {
-    this.manager = new ComponentManager();
     this.config = config;
   }
 
@@ -30,25 +29,27 @@ class Merger {
   /**
    * Merge OpenAPI document into the single file.
    * @param doc {object} OpenAPI document object
-   * @param inputFile {string} directory where the doc is located
+   * @param docPath {string} OpenAPI document file path
    * @returns merged OpenAPI object
    */
-  merge = async (doc, inputFile) => {
-    let currentFile = Path.resolve(process.cwd(), inputFile);
+  merge = async (doc, docPath) => {
+    docPath = Path.resolve(process.cwd(), docPath);
+    this.baseDir = Path.dirname(docPath);
+
     // convert to posix style path.
     // this path works with fs module like a charm on both windows and unix.
-    currentFile = parseUrl(currentFile).path;
+    docPath = parseUrl(docPath).path;
 
     // 1st merge: list all components
     this.manager = new ComponentManager();
-    await this.mergeRefs(doc, currentFile, "$", new Set());
+    await this.mergeRefs(doc, docPath, "$");
 
     // resolve component names in case of conflict
     const nameResolver = new ComponentNameResolver(this.manager.components);
 
     // 2nd merge: merge them all
     this.manager = new ComponentManager(nameResolver);
-    doc = await this.mergeRefs(doc, currentFile, "$", new Set());
+    doc = await this.mergeRefs(doc, docPath, "$");
     doc.components = _.merge(doc.components, this.manager.getComponentsSection());
     return doc;
   };
@@ -58,28 +59,21 @@ class Merger {
    * @param obj a target object or array
    * @param file the name of the file containing the target object
    * @param jsonPath a JSON path for accessing the target object
-   * @param done a set to hold file and JSON path arguments of previous calls
    * @returns {Promise<*[]|*>} a merged object or array
    */
-  mergeRefs = async (obj, file, jsonPath, done) => {
-    // prevent infinite loop
-    const id = `${file}\0${jsonPath}`;
-    if (done.has(id)) {
-      return obj;
-    }
-    done.add(id);
+  mergeRefs = async (obj, file, jsonPath) => {
     if (!_.isObject(obj)) {
       return obj;
     }
     let ret = _.isArray(obj) ? [] : {};
     for (const [key, val] of Object.entries(obj)) {
-      if (this.shouldHandleRef(key, jsonPath)) {
-        await this.handleRef(ret, key, val, file, jsonPath, done);
-      } else if (this.shouldHandleInclude(key)) {
-        ret = await this.handleInclude(ret, key, val, file, jsonPath, done);
+      if (this.isRef(key, jsonPath)) {
+        await this.handleRef(ret, key, val, file, jsonPath);
+      } else if (this.isInclude(key)) {
+        ret = await this.handleInclude(ret, key, val, file, jsonPath);
       } else {
         // go recursively
-        const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`, done);
+        const merged = await this.mergeRefs(val, file, `${jsonPath}.${key}`);
         // merge arrays or objects according their type
         if (merged instanceof IncludedArray && _.isArray(ret)) {
           ret = mergeOrOverwrite(ret, merged);
@@ -91,6 +85,10 @@ class Merger {
     return ret;
   };
 
+  isRef = (key, jsonPath) => {
+    return key === "$ref" || jsonPath.endsWith("discriminator.mapping");
+  };
+
   /**
    * Converts a remote/URL reference into local ones.
    * @param obj an object with a reference
@@ -98,9 +96,10 @@ class Merger {
    * @param val the value of the reference
    * @param file a name of the file containing the target object
    * @param jsonPath a JSON path for accessing the target object
-   * @param done a done argument to be passed through to mergeRefs function
    */
-  handleRef = async (obj, key, val, file, jsonPath, done) => {
+  handleRef = async (obj, key, val, file, jsonPath) => {
+    console.debug(`ref    : ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
+
     obj[key] = mergeOrOverwrite(obj[key], val);
 
     const pRef = parseUrl(val);
@@ -108,7 +107,7 @@ class Merger {
 
     const refType = getRefType(jsonPath);
     if (shouldInclude(refType)) {
-      await this.handleInclude(obj, key, val, file, jsonPath, done);
+      await this.handleInclude(obj, key, val, file, jsonPath);
       return;
     }
 
@@ -143,22 +142,13 @@ class Merger {
     }
     obj[key] = cmp.getLocalRef();
     // avoid infinite loop on recursive definition
-    if (file === nextFile && cmpExists) {
-      return;
+    if (!cmpExists) {
+      cmp.content = await this.mergeRefs(cmp.content, nextFile, `${jsonPath}.${key}`);
     }
-    const nextJsonPath = `$${pRef.hash ? pRef.hash.substr(1).replaceAll("/", ".") : ""}`;
-    cmp.content = await this.mergeRefs(cmp.content, nextFile, nextJsonPath, done);
   };
 
-  shouldHandleRef = (key, jsonPath) => {
-    if (key === "$ref") {
-      return true;
-    }
-    // discriminator mapping contains references
-    if (jsonPath.endsWith(`discriminator.mapping`)) {
-      return true;
-    }
-    return false;
+  isInclude = (key) => {
+    return key.match(Merger.INCLUDE_PATTERN);
   };
 
   /**
@@ -168,10 +158,11 @@ class Merger {
    * @param val the value of the inclusion
    * @param file a name of the file containing the target object
    * @param jsonPath a JSON path for accessing the target object
-   * @param done a done argument to be passed through to mergeRefs function
    * @returns {Promise<*>} a result object or array
    */
-  handleInclude = async (obj, key, val, file, jsonPath, done) => {
+  handleInclude = async (obj, key, val, file, jsonPath) => {
+    console.debug(`include: ${jsonPath} file=${Path.relative(this.baseDir, file)}`);
+
     obj[key] = mergeOrOverwrite(obj[key], val);
 
     const pRef = parseUrl(val);
@@ -211,14 +202,7 @@ class Merger {
           // include multiple files
           for (const mf of matchedFiles) {
             const basename = Path.basename(mf, Path.extname(mf));
-            content[basename] = await this.handleInclude(
-              { [key]: mf },
-              key,
-              mf,
-              file,
-              `${jsonPath}.${basename}`,
-              done
-            );
+            content[basename] = await this.handleInclude({ [key]: mf }, key, mf, file, `${jsonPath}.${basename}`);
           }
         } else {
           // include a single file
@@ -228,7 +212,7 @@ class Merger {
       nextFile = parsedTarget.hrefWoHash;
     }
     const sliced = sliceObject(content, pRef.hash);
-    const merged = await this.mergeRefs(sliced, nextFile, jsonPath, done);
+    const merged = await this.mergeRefs(sliced, nextFile, jsonPath);
     if (_.isArray(merged)) {
       if (_.isArray(obj)) {
         // merge array
@@ -246,10 +230,6 @@ class Merger {
       delete obj[key];
     }
     return obj;
-  };
-
-  shouldHandleInclude = (key) => {
-    return key.match(Merger.INCLUDE_PATTERN);
   };
 }
 
