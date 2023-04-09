@@ -23,7 +23,7 @@
   "dependencies": {
     "commander": "10.0.0",
     "deepmerge": "4.3.0",
-    "glob": "8.1.0",
+    "glob": "9.3.5",
     "js-yaml": "4.1.0",
     "lodash": "4.17.21",
     "loglevel": "1.8.1",
