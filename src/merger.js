@@ -198,7 +198,7 @@ class Merger {
         content = {};
         if (parsedTarget.hrefWoHash.includes("*")) {
           const matchedFiles = Glob.sync(parsedTarget.hrefWoHash).map((p) =>
-            Path.relative(Path.dirname(pFile.hrefWoHash), p)
+            Path.relative(Path.dirname(pFile.hrefWoHash), p),
           );
           // include multiple files
           for (const mf of matchedFiles) {
