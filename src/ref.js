@@ -53,7 +53,7 @@ const REF_TYPES = {
     //     https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#parameter-object
     //     https://github.com/OAI/OpenAPI-Specification/blob/main/versions/3.0.3.md#media-type-object
     return path.match(
-      `(schema|items|additionalProperties|(schemas|properties|discriminator)\\.${FIELD_PATTERN}|(allOf|oneOf|anyOf)\\.\\d+)$`
+      `(schema|items|additionalProperties|(schemas|properties|discriminator)\\.${FIELD_PATTERN}|(allOf|oneOf|anyOf)\\.\\d+)$`,
     );
   },
   pathItems: (path) => {
