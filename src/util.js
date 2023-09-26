@@ -30,10 +30,12 @@ function parseUrl(url) {
   const ret = Url.parse(url);
   ret.isLocal = !ret.path && ret.hash;
   ret.isHttp = ret.protocol && ret.protocol.match(/^(http|https):/);
-  ret.hrefWoHash = ret.href.replace(ret.hash, "");
   if (ret.hash) {
+    ret.hrefWoHash = ret.href.replace(ret.hash, "");
     // for windows
     ret.hash = ret.hash.replace(/%5C/g, "/");
+  } else {
+    ret.hrefWoHash = ret.href;
   }
   return ret;
 }
