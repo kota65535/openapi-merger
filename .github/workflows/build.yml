@@ -17,6 +17,7 @@ jobs:
           - ubuntu-latest
           - windows-latest
         node:
+          - 16
           - 18
           - 20
     runs-on: ${{ matrix.runs-on }}
