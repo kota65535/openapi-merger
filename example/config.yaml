@@ -1,0 +1,5 @@
+include:
+  petstore:
+    prefix: "/petstore"
+  uspto:
+    prefix: "/uspto"
