@@ -34,6 +34,8 @@ function parseUrl(url) {
     ret.hrefWoHash = ret.href.replace(ret.hash, "");
     // for windows
     ret.hash = ret.hash.replace(/%5C/g, "/");
+    ret.hash = ret.hash.replace(/%7B/g, "{");
+    ret.hash = ret.hash.replace(/%7D/g, "}");
   } else {
     ret.hrefWoHash = ret.href;
   }
